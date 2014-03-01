@@ -36,9 +36,10 @@ int main(int argc, char ** argv) {
   problem.updateForcingTerms();
   problem.solveStokes();
 
-  do {
-    output.writeHDF5File(problem.getTimestepNumber());
-
+  
+  while (problem.advanceTimestep()) {
+    output.writeHDF5File (problem.getTimestepNumber());
+    
     problem.updateForcingTerms();
     problem.solveStokes();
     problem.recalculateTimestep();
@@ -46,7 +47,8 @@ int main(int argc, char ** argv) {
 
   } while (problem.advanceTimestep());
 
-
+  output.writeHDF5File();
+  
   int M = geometry.getM();
   int N = geometry.getN();
   double h = problem.getH();

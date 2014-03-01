@@ -29,5 +29,6 @@ class OutputStructure {
     double dx;
 
     string outputFormat;
+    string outputPath;
     string outputFilename;
 };

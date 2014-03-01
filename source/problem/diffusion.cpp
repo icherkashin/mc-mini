@@ -71,7 +71,7 @@ void ProblemStructure::backwardEuler() {
   SparseMatrix<double> lhs;
   SparseMatrix<double> rhsBoundary;
   lhs.resize (M * N, M * N);
-  rhsBoundary.resize (M * N, 2 * N);
+  rhsBoundary.resize (M * N, 2 * M);
 
   vector<Triplet<double> > tripletList;
   tripletList.reserve (5 * M * N);

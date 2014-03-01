@@ -16,16 +16,16 @@ enter problemParams
   # Starting time of the current problem. Used strictly for timekeeping.
   set startTime=0.0
   # Ending time of the current problem.
-  set endTime=10.0
+  set endTime=100.0
 
   # y-extent of the problem domain. Used for scaling the domain in space.
-  set yExtent=4
+  set yExtent=128.0
   # x-extent of the problem domain. Used for scaling the domain in space if the y-extent is not
   # previously specified.
   # set xExtent=4
 
   # Temperature diffusivity constant of the material model
-  set diffusivity=1E-02
+  set diffusivity=1E-01
 
   set buoyancy=1.0
 
@@ -46,11 +46,11 @@ enter problemParams
   # Parameter subsection for the buoyancy model.
   enter buoyancyModel
     # Reference temperature for the buoyancy calculation.
-    set referenceTemperature=273.15
+    set referenceTemperature=273
     # Material density constant for the buoyancy calculation.
     set densityConstant=100.0
     # Thermal expansion constant for the buoyancy calculation.
-    set thermalExpansion=0.5
+    set thermalExpansion=10.0
   leave
 
   # Temperature model for the given problem. Options include:
@@ -66,25 +66,25 @@ enter problemParams
   #     Square wave temperature initial conditions. Creates a 2D square wave 
   #     perturbation in a background of temperature referenceTempreature with 
   #     amplitude given by referenceTempreature.
-  set temperatureModel=constant
+  set temperatureModel=squareWave
   # Parameter subsection for the initial temperature model.
   enter initialTemperatureParams
     # Reference or "background" temperature
-    set referenceTemperature=273.15
+    set referenceTemperature=273
     # Number of modes in the x-direction for use with sineWave initial conditions.
-    set xModes=2
+    set xModes=1
     # Number of modes in the y-direction for use with sineWave initial conditions.
     set yModes=2
     # Amplitude of the perturbation from reference temperature.
-    set temperatureScale=10.0
+    set temperatureScale=30.0
   leave
 
   # Temperature boundary parameters for the given problem
   enter temperatureBoundaryParams
     # Prescribed temperature along the upper boundary
-    set upperBoundaryTemperature=273.15
+    set upperBoundaryTemperature=263
     # Prescribed temperature along the lower boundary
-    set lowerBoundaryTemperature=273.15
+    set lowerBoundaryTemperature=283
   leave
 
   # Viscosity model for the given problem. Options include:
@@ -107,7 +107,7 @@ enter problemParams
   enter initialViscosity
     # Viscosity scale for use with the constant viscosity model. Specifies the
     # value of the viscosity across the domain.
-    set viscosityScale=10.0
+    set viscosityScale=1.0
   leave
 
   # Boundary model for the given problem. Options include:
@@ -126,6 +126,8 @@ leave
 enter outputParams
   # Output format. Current output method only supports hdf5 output.
   set outputFormat=hdf5
+  # Output path. Specifies the path for the output file.
+  set outputPath=output/exampleOutput
   # Output filename. Specifies the filename for the output file.
-  set outputFilename=output
+  set outputFilename=exampleOutput
 leave

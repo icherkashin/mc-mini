@@ -24,7 +24,8 @@ ProblemStructure::ProblemStructure
     parser.getParamDouble   ("cfl",              cfl);
 
     parser.getParamDouble   ("startTime",        time);
-    parser.getParamDouble   ("endTime",          endTime);
+    parser.queryParamDouble ("endTime",          endTime, INT_MAX);
+    parser.queryParamInt    ("endStep",          endStep, INT_MAX);
     timestepNumber = 0;
 
     parser.queryParamDouble ("xExtent",          xExtent, 0.0);
@@ -64,7 +65,7 @@ bool ProblemStructure::advanceTimestep() {
   time += deltaT;
   timestepNumber++;
 
-  return (time < endTime);
+  return ((time < endTime) && (timestepNumber < endStep));
 }
 
 void ProblemStructure::recalculateTimestep() {

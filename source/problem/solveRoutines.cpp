@@ -111,11 +111,15 @@ void ProblemStructure::solveStokes() {
 
   stokesSolnVector = solver.solve (forcingMatrix  * Map<VectorXd>(geometry.getForcingData(), 2 * M * N - M - N) + 
                                    boundaryMatrix * Map<VectorXd>(geometry.getVelocityBoundaryData(), 2 * M + 2 * N));
+
+  Map<VectorXd> pressureVector (geometry.getPressureData(), M * N);
+  double pressureMean = pressureVector.sum() / (M * N);
+  pressureVector -= VectorXd::Constant (M * N, pressureMean);
 }
 
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
-  // upwindMethod();
-  backwardEuler();
+  upwindMethod();
+  // backwardEuler();
 }

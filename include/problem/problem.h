@@ -64,7 +64,9 @@ class ProblemStructure {
     double time;
     double endTime;
     double deltaT;
+    
     int timestepNumber;
+    int endStep;
 
     double xExtent;
     double yExtent;
