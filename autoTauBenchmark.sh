@@ -3,16 +3,18 @@
 rm tauBenchmarkConvergence
 rm tauBenchmarkConvergenceTable
 
-for i in 4 8 16 32 64 128
+for i in 1 2 3 4 5 6 7 8
 do
-  ./build/mc-mini paramFiles/tauBenchmark$(($i))x$(($i * 2)) 1>> tauBenchmarkConvergence 2> /dev/null
+  ./build/mc-mini paramFiles/tauBenchmark/tauBenchmark$(($i)) 1>> tauBenchmarkConvergence 2> /dev/null
 done
 
 echo     "U Velocity Convergence table" | tee -a tauBenchmarkConvergenceTable
 echo -e  "Convergence rate\tResidual" | tee -a tauBenchmarkConvergenceTable
 echo -ne "\t\t" | tee -a tauBenchmarkConvergenceTable
 prevURes=0
-for ures in `awk '{print $1}' tauBenchmarkConvergence | sed ':a;N;$!ba;s/\n/ /g'`
+for ures in `grep -v '^#' tauBenchmarkConvergence |
+             awk '{print $1}' | 
+             sed ':a;N;$!ba;s/\n/ /g'`
 do
   ures=`echo ${ures} | sed -e 's/[eE]+*/\\*10\\^/' | bc -l`
   if [ $prevURes != 0 ]; then
@@ -28,7 +30,9 @@ echo     "V Velocity Convergence table" | tee -a tauBenchmarkConvergenceTable
 echo -e  "Convergence rate\tResidual"  | tee -a tauBenchmarkConvergenceTable
 echo -ne "\t\t" | tee -a tauBenchmarkConvergenceTable
 prevVRes=0
-for vres in `awk '{print $2}' tauBenchmarkConvergence | sed ':a;N;$!ba;s/\n/ /g'`
+for vres in `grep -v '^#' tauBenchmarkConvergence | 
+             awk '{print $2}' | 
+             sed ':a;N;$!ba;s/\n/ /g'`
 do
   vres=`echo ${vres} | sed -e 's/[eE]+*/\\*10\\^/' | bc -l`
   if [ $prevVRes != 0 ]; then

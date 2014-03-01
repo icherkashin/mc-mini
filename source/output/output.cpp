@@ -60,7 +60,7 @@ void OutputStructure::writeHDF5File() {
   H5File outputFile (H5std_string (outputPath + "/" +
                                    outputFilename + ".h5"), H5F_ACC_TRUNC);
   
-  cout << " ==>> Outputting current data to file \"" << 
+  cout << "#==>> Outputting current data to file \"" << 
           outputPath << "/" << outputFilename << ".h5\"" << endl;
   
   ofstream xdmfFile ((outputPath + "/" + outputFilename + ".xdmf").c_str(), ofstream::out);
@@ -237,7 +237,7 @@ void OutputStructure::writeHDF5File (const int timestep) {
                                    ".h5"),
                      H5F_ACC_TRUNC);
 
-  cout << "==>> Outputting current data to \"" <<
+  cout << "#==>> Outputting current data to \"" <<
           outputPath << "/" << outputFilename << "-" << timestep << ".h5\"" << endl;
 
   DataSet dataset;
