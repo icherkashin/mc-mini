@@ -162,7 +162,7 @@ void ProblemStructure::initializeViscosity() {
   } else if (viscosityModel == "solCXBenchmark") {
     for (int i = 0; i < (M + 1); ++i)
       for (int j = 0; j < (N + 1); ++j) 
-        viscosityData[i * (N + 1) + j] = (j * h <= xExtent / 2) ? 1.0 : 1.0E06;
+        viscosityData[i * (N + 1) + j] = (j <= N / 2) ? 1.0 : 1.0E06;
     viscosity = 1E06;
   }
 }

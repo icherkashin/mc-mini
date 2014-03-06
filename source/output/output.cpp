@@ -168,19 +168,6 @@ void OutputStructure::writeHDF5File() {
            << "        </DataItem>" << endl
            << "      </Attribute>" << endl;
                                                         
-  // Write Viscosity
-  double * viscosityData = geometry.getViscosityData();
-  dataset = outputFile.createDataSet ("Viscosity",
-                                      PredType::NATIVE_DOUBLE,
-                                      DataSpace (2, dimsf));
-  dataset.write (viscosityData,
-                 PredType::NATIVE_DOUBLE);
-
-  xdmfFile << "      <Attribute Name=\"Viscosity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
-           << "        <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
-           << "          " << outputFilename + ".h5:/Viscosity" << endl
-           << "        </DataItem>" << endl
-           << "      </Attribute>" << endl;
 
   double * velocityDivergence = new double[M * N];
   for (int i = 0; i < M; ++i) {
@@ -219,6 +206,21 @@ void OutputStructure::writeHDF5File() {
            << "        </DataItem>" << endl
            << "      </Attribute>" << endl;
  
+  dimsf[0] = (M + 1); dimsf[1] = (N + 1);
+  
+  // Write Viscosity
+  double * viscosityData = geometry.getViscosityData();
+  dataset = outputFile.createDataSet ("Viscosity",
+                                      PredType::NATIVE_DOUBLE,
+                                      DataSpace (2, dimsf));
+  dataset.write (viscosityData,
+                 PredType::NATIVE_DOUBLE);
+
+  xdmfFile << "      <Attribute Name=\"Viscosity\" AttributeType=\"Scalar\" Center=\"Node\">" << endl
+           << "        <DataItem Dimensions=\"" << M + 1 << " " << N + 1 << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+           << "          " << outputFilename + ".h5:/Viscosity" << endl
+           << "        </DataItem>" << endl
+           << "      </Attribute>" << endl;
   delete[] velocityDivergence;
   delete[] interpolatedUVelocityData;
   delete[] interpolatedVVelocityData;

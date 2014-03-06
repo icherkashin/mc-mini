@@ -44,7 +44,7 @@ void ProblemStructure::updateForcingTerms() {
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingData [i * N + j] = - sin((j + 1) * M_PI * h) * cos ((i + 0.5) * M_PI * h);
+        vForcingData [i * N + j] = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
 
   } else if (forcingModel == "buoyancy") {
     double * temperatureData = geometry.getTemperatureData();

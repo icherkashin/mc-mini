@@ -26,6 +26,8 @@ int main(int argc, char ** argv) {
     exit (-1);
   }
 
+  setNbThreads(8);
+
   ParamParser parser(string{argv[1]});
   GeometryStructure geometry (parser);
   ProblemStructure  problem  (parser, geometry);

@@ -3,13 +3,13 @@
 rm tauBenchmarkConvergence
 rm tauBenchmarkConvergenceTable
 
-for i in 1 2 3 4 5 6 7 8
+for i in 1 2 3 4 5 6
 do
   ./build/mc-mini paramFiles/tauBenchmark/tauBenchmark$(($i)) 1>> tauBenchmarkConvergence 2> /dev/null
 done
 
 echo     "U Velocity Convergence table" | tee -a tauBenchmarkConvergenceTable
-echo -e  "Convergence rate\tResidual" | tee -a tauBenchmarkConvergenceTable
+echo -e  "Convergence rate\tError" | tee -a tauBenchmarkConvergenceTable
 echo -ne "\t\t" | tee -a tauBenchmarkConvergenceTable
 prevURes=0
 for ures in `grep -v '^#' tauBenchmarkConvergence |
@@ -27,7 +27,7 @@ done
 
 echo -e  "\n\n" | tee -a tauBenchmarkConvergenceTable
 echo     "V Velocity Convergence table" | tee -a tauBenchmarkConvergenceTable
-echo -e  "Convergence rate\tResidual"  | tee -a tauBenchmarkConvergenceTable
+echo -e  "Convergence rate\tError"  | tee -a tauBenchmarkConvergenceTable
 echo -ne "\t\t" | tee -a tauBenchmarkConvergenceTable
 prevVRes=0
 for vres in `grep -v '^#' tauBenchmarkConvergence | 

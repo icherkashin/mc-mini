@@ -95,8 +95,8 @@ namespace SparseForms {
 
     for (int i = 0; i < (M - 1); ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityData[(i + 1) * N + j] + 
-                            viscosityData[(i + 1) * N + (j + 1)]) / 2;
+        double viscosity = (viscosityData[(i + 1) * (N + 1) + j] + 
+                            viscosityData[(i + 1) * (N + 1) + (j + 1)]) / 2;
         // The first and last elements of each row are non-standard because the four-point
         // laplacian relies upon points not included in our gridding
         if ((j == 0) || (j == (N - 1)))
