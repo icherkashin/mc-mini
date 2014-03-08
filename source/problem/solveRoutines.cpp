@@ -55,7 +55,7 @@ void ProblemStructure::updateForcingTerms() {
     double thermalExpansion;
 
     if (parser.push ("problemParams")) {
-      if (parser.push ("buoyancyModel")) {
+      if (parser.push ("buoyancyModelParams")) {
         parser.queryParamDouble ("referenceTemperature", referenceTemperature, 273.15);
         parser.queryParamDouble ("densityConstant",      densityConstant,      100.0);
         parser.queryParamDouble ("thermalExpansion",     thermalExpansion,       1.0);

@@ -1,0 +1,50 @@
+enter geometryParams
+  set M=128
+  set N=128
+leave
+
+enter problemParams
+  set cfl=0.5
+
+  set startTime=0.0
+  set endTime=1.0
+  set endStep=1
+
+  set yExtent=1
+
+  set diffusivity=1.0
+  set buoyancy=1.0
+
+  set forcingModel=buoyancy
+  enter buoyancyModel
+    set referenceTemperature=273.15
+    set densityConstant=100.0
+    set thermalExpansion=1.0
+  leave
+
+  set temperatureModel=sineWave
+  enter initialTemperatureParams
+    set referenceTemperature=273.15
+    set temperatureScale=10.0
+    set xModes=2
+    set yModes=2
+  leave
+
+  enter temperatureBoundaryParams
+    set upperBoundaryTemperature=273.15
+    set lowerBoundaryTemperature=273.15
+  leave
+
+  set viscosityModel=constant
+  enter initialViscosity
+    set viscosityScale=1.0
+  leave
+
+  set boundaryModel=noFlux
+leave
+
+enter outputParams
+  set outputFormat=hdf5
+  set outputPath=output/sinewave
+  set outputFilename=sinewave7
+leave
