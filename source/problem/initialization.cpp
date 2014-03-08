@@ -120,20 +120,18 @@ void ProblemStructure::initializeVelocityBoundary() {
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < N; ++j)
         vVelocityBoundaryData [i * N + j] = -sin ((j + 0.5) * h) * cos (i * M * h);
-  } else if (boundaryModel == "solCXBenchmark") {
-    for (int i = 0; i < M; ++i) 
-      for (int j = 0; j < 2; ++j)
-        uVelocityBoundaryData [i * 2 + j] = 0;
-    for (int i = 0; i < 2; ++i) 
-      for (int j = 0; j < N; ++j) 
-        vVelocityBoundaryData [i * N + j] = 0;
-  } else if (boundaryModel == "noFlux") {
+  } else if (boundaryModel == "solCXBenchmark" ||
+             boundaryModel == "solKZBenchmark" ||
+             boundaryModel == "noFlux") {
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < 2; ++j)
         uVelocityBoundaryData[i * 2 + j] = 0;
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < N; ++j)
         vVelocityBoundaryData[i * N + j] = 0;
+  } else {
+    cerr << "Unexpected boundary model: \"" << boundaryModel << "\" : Shutting down now!" << endl;
+    exit(-1);
   }
 }
 
@@ -163,6 +161,12 @@ void ProblemStructure::initializeViscosity() {
     for (int i = 0; i < (M + 1); ++i)
       for (int j = 0; j < (N + 1); ++j) 
         viscosityData[i * (N + 1) + j] = (j <= N / 2) ? 1.0 : 1.0E06;
-    viscosity = 1E06;
+  } else if (viscosityModel == "solKZBenchmark") {
+    for (int i = 0; i < (M + 1); ++i)
+      for (int j = 0; j < (N + 1); ++j)
+        viscosityData[i * (N + 1) + j] = 1.0 + j * h * 1.0E06;
+  } else {
+    cerr << "Unexpected viscosity model: \"" << viscosityModel << "\" : Shutting down now!" << endl;
+    exit(-1);
   }
 }

@@ -2,7 +2,6 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
-#include "hdf5.h"
 #include "H5Cpp.h"
 
 #include "geometry/geometry.h"

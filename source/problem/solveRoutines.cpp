@@ -36,7 +36,8 @@ void ProblemStructure::updateForcingTerms() {
       for (int j = 0; j < N; ++j)
         vForcingData [i * N + j] = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
-  } else if (forcingModel == "solCXBenchmark") {
+  } else if (forcingModel == "solCXBenchmark" ||
+             forcingModel == "solKZBenchmark") {
     // solCX Benchmark taken from Kronbichler et al. (2011)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
@@ -77,6 +78,9 @@ void ProblemStructure::updateForcingTerms() {
                                        temperatureData [(i + 1) * N + j]) / 2 -
                                       referenceTemperature));
       }
+  } else {
+    cerr << "Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now!" << endl;
+    exit(-1);
   }
 }
 
