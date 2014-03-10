@@ -37,7 +37,7 @@ enter problemParams
 
   set viscosityModel=constant
   enter initialViscosity
-    set viscosityScale=1.0
+    set viscosityScale=50.0
   leave
 
   set boundaryModel=noFlux
