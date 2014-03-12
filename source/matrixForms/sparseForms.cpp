@@ -234,12 +234,6 @@ namespace SparseForms {
                                                 viscosity / (h * h)));
       }
     }
-    /*
-    for (int i = 0; i < M; ++i) {
-      tripletList.push_back (Triplet<double> (M0 + i * (N - 1),           N0 + i * 2,     viscosityData[0] / (h * h)));
-      tripletList.push_back (Triplet<double> (M0 + (i + 1) * (N - 1) - 1, N0 + i * 2 + 1, viscosityData[0] / (h * h)));
-    }
-    */
   }
 
   void makeBCLaplacianYBlock (vector<Triplet<double> >& tripletList,
@@ -260,12 +254,6 @@ namespace SparseForms {
                                                 viscosity / (h * h)));
       }
     }
-    /*
-    for (int i = 0; i < N; ++i) {
-      tripletList.push_back (Triplet<double> (M0 + i,               N0 + i,     viscosityData[0] / (h * h)));
-      tripletList.push_back (Triplet<double> (M0 + (M - 2) * N + i, N0 + N + i, viscosityData[0] / (h * h)));
-    }
-    */
   }
 
   void makeBCDivXBlock (vector<Triplet<double> >& tripletList,

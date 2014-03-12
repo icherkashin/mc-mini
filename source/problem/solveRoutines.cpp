@@ -108,8 +108,8 @@ void ProblemStructure::solveStokes() {
     boundaryMatrix.makeCompressed();
 
     solver.analyzePattern (stokesMatrix);
-    solver.compute (stokesMatrix);
-
+    solver.factorize (stokesMatrix);
+    
     initialized = true;
   }
 

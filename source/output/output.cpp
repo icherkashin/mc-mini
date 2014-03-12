@@ -10,9 +10,12 @@
 #include "parser/parser.h"
 #include "output/output.h"
 
+#include <Eigen/Dense>
+
 #ifndef H5_NO_NAMESPACE
   using namespace H5;
 #endif
+using namespace Eigen;
 using namespace std;
 
 OutputStructure::OutputStructure (ParamParser&       pp,
@@ -175,19 +178,19 @@ void OutputStructure::writeHDF5File() {
       double uDivergence, vDivergence;
 
       if (i == 0) {
-        vDivergence = (vVelocityData[i * (N - 1) + j] - vVelocityBoundaryData[j]) / dx;
+        vDivergence = (vVelocityBoundaryData[j] - vVelocityData[i * N + j]) / dx;
       } else if (i == (M - 1)) {
-        vDivergence = (vVelocityBoundaryData[M + j] - vVelocityData[(i - 1) * (N - 1) + j]) / dx;
+        vDivergence = (vVelocityData[(i - 1) * N + j] - vVelocityBoundaryData[M + j]) / dx;
       } else {
-        vDivergence = (vVelocityData[i * (N - 1) + j] - vVelocityData[(i - 1) * (N - 1) + j]) / dx;
+        vDivergence = (vVelocityData[(i - 1) * N + j] - vVelocityData[i * N + j]) / dx;
       }
 
       if (j == 0) {
-        uDivergence = (uVelocityData[i * N + j] - uVelocityBoundaryData[2 * i]) / dx;
+        uDivergence = (uVelocityBoundaryData[2 * i] - uVelocityData[i * (N - 1) + j]) / dx;
       } else if (j == (N - 1)) {
-        uDivergence = (uVelocityBoundaryData[2 * i + 1] - uVelocityData[i * N + (j - 1)]) / dx;
+        uDivergence = (uVelocityData[i * (N - 1) + (j - 1)] + uVelocityBoundaryData[2 * i + 1]) / dx;
       } else {
-        uDivergence = (uVelocityData[i * N + j] - uVelocityData[i * N + (j - 1)]) / dx;
+        uDivergence = (uVelocityData[i * (N - 1) + (j - 1)] - uVelocityData[i * (N - 1) + j]) / dx;
       }
 
       velocityDivergence[i * N + j] = uDivergence + vDivergence;
@@ -344,24 +347,26 @@ void OutputStructure::writeHDF5File (const int timestep) {
       double uDivergence, vDivergence;
 
       if (i == 0) {
-        vDivergence = (vVelocityData[i * (N - 1) + j] - vVelocityBoundaryData[j]) / dx;
+        vDivergence = (vVelocityBoundaryData[j] - vVelocityData[i * N + j]) / dx;
       } else if (i == (M - 1)) {
-        vDivergence = (vVelocityBoundaryData[M + j] - vVelocityData[(i - 1) * (N - 1) + j]) / dx;
+        vDivergence = (vVelocityData[(i - 1) * N + j] - vVelocityBoundaryData[M + j]) / dx;
       } else {
-        vDivergence = (vVelocityData[i * (N - 1) + j] - vVelocityData[(i - 1) * (N - 1) + j]) / dx;
+        vDivergence = (vVelocityData[(i - 1) * N + j] - vVelocityData[i * N + j]) / dx;
       }
 
       if (j == 0) {
-        uDivergence = (uVelocityData[i * N + j] - uVelocityBoundaryData[2 * i]) / dx;
+        uDivergence = (uVelocityBoundaryData[2 * i] - uVelocityData[i * (N - 1) + j]) / dx;
       } else if (j == (N - 1)) {
-        uDivergence = (uVelocityBoundaryData[2 * i + 1] - uVelocityData[i * N + (j - 1)]) / dx;
+        uDivergence = (uVelocityData[i * (N - 1) + (j - 1)] - uVelocityBoundaryData[2 * i + 1]) / dx;
       } else {
-        uDivergence = (uVelocityData[i * N + j] - uVelocityData[i * N + (j - 1)]) / dx;
+        uDivergence = (uVelocityData[i * (N - 1) + (j - 1)] - uVelocityData[i * (N - 1) + j])  / dx;
       }
 
       velocityDivergence[i * N + j] = uDivergence + vDivergence;
     }
   }
+
+  cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(velocityDivergence, M, N) << endl << endl;
 
   dataset = outputFile.createDataSet ("Divergence",
                                       PredType::NATIVE_DOUBLE,

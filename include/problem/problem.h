@@ -39,8 +39,6 @@ class ProblemStructure {
     void outputTemperature();
     void outputBoundaryTemperature();
 
-    void outputH5();
-
     double getH();
     double getTime();
     double getEndTime();
@@ -64,7 +62,6 @@ class ProblemStructure {
     double time;
     double endTime;
     double deltaT;
-    
     int timestepNumber;
     int endStep;
 
@@ -74,5 +71,4 @@ class ProblemStructure {
 
     double viscosity;
     double diffusivity;
-    double buoyancy;
 };

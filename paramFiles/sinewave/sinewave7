@@ -13,10 +13,9 @@ enter problemParams
   set yExtent=1
 
   set diffusivity=1.0
-  set buoyancy=1.0
 
   set forcingModel=buoyancy
-  enter buoyancyModel
+  enter buoyancyModelParams
     set referenceTemperature=273.15
     set densityConstant=100.0
     set thermalExpansion=1.0

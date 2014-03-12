@@ -44,7 +44,6 @@ ProblemStructure::ProblemStructure
     }
 
     parser.getParamDouble   ("diffusivity",      diffusivity);
-    parser.getParamDouble   ("buoyancy",         buoyancy);
 
     parser.queryParamString ("forcingModel",     forcingModel,     "tauBenchmark");
     parser.queryParamString ("temperatureModel", temperatureModel, "constant");
