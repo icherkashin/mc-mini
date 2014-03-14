@@ -366,8 +366,6 @@ void OutputStructure::writeHDF5File (const int timestep) {
     }
   }
 
-  cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(velocityDivergence, M, N) << endl << endl;
-
   dataset = outputFile.createDataSet ("Divergence",
                                       PredType::NATIVE_DOUBLE,
                                       DataSpace (2, dimsf));
