@@ -2,9 +2,9 @@
 # the geometry of the problem (size of the domain, dimensions, etc...)
 enter geometryParams
   # Rows in the problem domain
-  set M=64
+  set M=128
   # Columns in the problem domain
-  set N=64
+  set N=128
 leave
 
 # Problem parameter section. Includes parameters describing the specifics of the
@@ -21,10 +21,10 @@ enter problemParams
   # set endStep=1
 
   # y-extent of the problem domain. Used for scaling the domain in space.
-  set yExtent=1.0
+  set yExtent=4.0
   # x-extent of the problem domain. Used for scaling the domain in space if the y-extent is not
   # previously specified.
-  # set xExtent=1.0
+  # set xExtent=4
 
   # Temperature diffusivity constant of the material model
   set diffusivity=1E-01
@@ -68,7 +68,7 @@ enter problemParams
   #     Square wave temperature initial conditions. Creates a 2D square wave 
   #     perturbation in a background of temperature referenceTempreature with 
   #     amplitude given by referenceTempreature.
-  set temperatureModel=sineWave
+  set temperatureModel=squareWave
   # Parameter subsection for the initial temperature model.
   enter initialTemperatureParams
     # Reference or "background" temperature
@@ -129,7 +129,7 @@ enter outputParams
   # Output format. Current output method only supports hdf5 output.
   set outputFormat=hdf5
   # Output path. Specifies the path for the output file.
-  set outputPath=output/exampleOutput
+  set outputPath=output/squarewave
   # Output filename. Specifies the filename for the output file.
-  set outputFilename=exampleOutput
+  set outputFilename=squarewave7
 leave
