@@ -35,9 +35,21 @@ OutputStructure::OutputStructure (ParamParser&       pp,
 
     parser.pop();
   }
+
+  problemXdmfFile.open ((outputPath + "/" + outputFilename + "-series.xdmf").c_str(), ofstream::out);
+  problemXdmfFile << "<?xml version=\"1.0\"?>" << endl
+                  << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>" << endl
+                  << "<Xdmf Version=\"2.0\">" << endl
+                  << "  <Domain>" << endl
+                  << "    <Grid Name=\"CellTime\" GridType=\"Collection\" CollectionType=\"Temporal\">" << endl;
 }
 
-OutputStructure::~OutputStructure () {}
+OutputStructure::~OutputStructure () {
+  problemXdmfFile << "    </Grid>" << endl
+                  << "  </Domain>" << endl
+                  << "</Xdmf>" << endl;
+  problemXdmfFile.close();
+}
 
 void OutputStructure::writeDefaultFile() {
   if (outputFormat == "hdf5") {
@@ -245,32 +257,20 @@ void OutputStructure::writeHDF5File (const int timestep) {
   cout << "#==>> Outputting current data to \"" <<
           outputPath << "/" << outputFilename << "-" << timestep << ".h5\"" << endl;
 
+  problemXdmfFile << "      <Grid Name=\"mesh\" GridType=\"Uniform\">" << endl
+                  << "        <Time Value=\"" << problem.getTime() << "\"/>" << endl
+                  << "        <Topology TopologyType=\"2DCoRectMesh\" NumberOfElements=\"" << M + 1 << " " << N + 1<< "\"/>" << endl
+                  << "        <Geometry GeometryType=\"Origin_DxDy\">" << endl
+                  << "          <DataItem Dimensions=\"2\">" << endl
+                  << "            0 0" << endl
+                  << "          </DataItem>" << endl
+                  << "          <DataItem Dimensions=\"2\">" << endl
+                  << "            " << dx << " " << dx << endl
+                  << "          </DataItem>" << endl
+                  << "        </Geometry>" << endl;
+  
   DataSet dataset;
-  hsize_t dimsf[2] = {0, 0};
-
-  // Write x positions
-  double *x = new double [N + 1];
-  for (int i = 0; i < (N + 1); ++i)
-    x [i] = dx * i;
-  dimsf[0] = N + 1;
-  dataset = outputFile.createDataSet ("X", 
-                                      PredType::NATIVE_DOUBLE, 
-                                      DataSpace (1, dimsf));
-  dataset.write (x, 
-                 PredType::NATIVE_DOUBLE);
-
-  // Write y positions
-  double *y = new double [M + 1];
-  for (int j = 0; j < (M + 1); ++j)
-    y [j] = dx * j;
-  dimsf[0] = M + 1;
-  dataset = outputFile.createDataSet ("Y",
-                                      PredType::NATIVE_DOUBLE,
-                                      DataSpace (1, dimsf));
-  dataset.write (y, 
-                 PredType::NATIVE_DOUBLE);
-
-
+  hsize_t dimsf[2];
   dimsf[0] = M; dimsf[1] = N;
   
   // Write temperature
@@ -281,6 +281,12 @@ void OutputStructure::writeHDF5File (const int timestep) {
   dataset.write (temperatureData, 
                  PredType::NATIVE_DOUBLE);
 
+  problemXdmfFile << "        <Attribute Name=\"Temperature\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
+                  << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/Temperature" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
+
   // Write pressure
   double * pressureData = geometry.getPressureData();
   dataset = outputFile.createDataSet ("Pressure",
@@ -288,6 +294,12 @@ void OutputStructure::writeHDF5File (const int timestep) {
                                       DataSpace (2, dimsf));
   dataset.write (pressureData, 
                  PredType::NATIVE_DOUBLE);
+
+  problemXdmfFile << "        <Attribute Name=\"Pressure\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
+                  << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/Pressure" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
 
   // Write U Velocity
   double * interpolatedUVelocityData = new double [M * N];
@@ -310,6 +322,12 @@ void OutputStructure::writeHDF5File (const int timestep) {
                                       DataSpace (2, dimsf));
   dataset.write (interpolatedUVelocityData,
                  PredType::NATIVE_DOUBLE);
+
+  problemXdmfFile << "        <Attribute Name=\"UVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
+                  << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/UVelocity" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
   
   // Write V Velocity
   double * interpolatedVVelocityData = new double [M * N];
@@ -333,13 +351,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
   dataset.write (interpolatedVVelocityData,
                  PredType::NATIVE_DOUBLE);
                                                         
-  // Write Viscosity
-  double * viscosityData = geometry.getViscosityData();
-  dataset = outputFile.createDataSet ("Viscosity",
-                                      PredType::NATIVE_DOUBLE,
-                                      DataSpace (2, dimsf));
-  dataset.write (viscosityData,
-                 PredType::NATIVE_DOUBLE);
+  problemXdmfFile << "        <Attribute Name=\"VVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
+                  << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/VVelocity" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
 
   double * velocityDivergence = new double[M * N];
   for (int i = 0; i < M; ++i) {
@@ -372,10 +388,31 @@ void OutputStructure::writeHDF5File (const int timestep) {
   dataset.write (velocityDivergence,
                  PredType::NATIVE_DOUBLE);
 
- 
+  problemXdmfFile << "        <Attribute Name=\"Divergence\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
+                  << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/Divergence" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
+
+  dimsf[0] = (M + 1); dimsf[1] = (N + 1);
+  
+  // Write Viscosity
+  double * viscosityData = geometry.getViscosityData();
+  dataset = outputFile.createDataSet ("Viscosity",
+                                      PredType::NATIVE_DOUBLE,
+                                      DataSpace (2, dimsf));
+  dataset.write (viscosityData,
+                 PredType::NATIVE_DOUBLE);
+
+  problemXdmfFile << "        <Attribute Name=\"Viscosity\" AttributeType=\"Scalar\" Center=\"Node\">" << endl
+                  << "          <DataItem Dimensions=\"" << M + 1<< " " << N + 1 << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
+                  << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/Viscosity" << endl
+                  << "          </DataItem>" << endl
+                  << "        </Attribute>" << endl;
+  
   delete[] velocityDivergence;
-  delete[] x;
-  delete[] y;
   delete[] interpolatedUVelocityData;
   delete[] interpolatedVVelocityData;
+
+  problemXdmfFile << "      </Grid>" << endl;
 }

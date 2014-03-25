@@ -3,8 +3,7 @@
 #include <Eigen/Sparse>
 
 #include "matrixForms/sparseForms.h"
-
-#define DEBUG true
+#include "debug.h"
 
 using namespace Eigen;
 
@@ -14,7 +13,6 @@ namespace SparseForms {
                          const int N,
                          const double h,
                          const double * viscosityData) {
-    assert ((M > 0) && (N > 0));
     if (DEBUG) cerr << "Creating stokesMatrix." << endl;
 
     vector<Triplet<double> > tripletList;
@@ -36,7 +34,6 @@ namespace SparseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    assert ((M > 0) && (N > 0));
     if (DEBUG) cerr << "Creating LaplacianXBlock." << endl;
 
     for (int i = 0; i < M; ++i) {
@@ -90,7 +87,6 @@ namespace SparseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    assert ((M > 0) && (N > 0));
     if (DEBUG) cerr << "Creating LaplacianYBlock." << endl;
 
     for (int i = 0; i < (M - 1); ++i) {
@@ -139,9 +135,9 @@ namespace SparseForms {
                        const double h) {
     if (DEBUG) cerr << "Creating GradXBlock." << endl;
     for (int i = 0; i < M; ++i) {
-      for (int x = 0; x < N - 1; ++x) {
-        tripletList.push_back (Triplet<double> (M0 + i * (N - 1) + x, N0 + i * N + x,     -1 / h));
-        tripletList.push_back (Triplet<double> (M0 + i * (N - 1) + x, N0 + i * N + 1 + x,  1 / h));
+      for (int j = 0; j < (N - 1); ++j) {
+        tripletList.push_back (Triplet<double> (M0 + i * (N - 1) + j, N0 + i * N + j,     -1 / h));
+        tripletList.push_back (Triplet<double> (M0 + i * (N - 1) + j, N0 + i * N + (j + 1),  1 / h));
       }
     }
   }

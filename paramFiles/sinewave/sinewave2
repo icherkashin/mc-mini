@@ -7,18 +7,18 @@ enter problemParams
   set cfl=0.5
 
   set startTime=0.0
-  set endTime=1.0
-  set endStep=1
+  set endTime=0.025
+  # set endStep=1
 
-  set yExtent=1
+  set yExtent=1.0
 
-  set diffusivity=1.0
+  set diffusivity=1E-01
 
   set forcingModel=buoyancy
   enter buoyancyModelParams
     set referenceTemperature=273.15
     set densityConstant=100.0
-    set thermalExpansion=1.0
+    set thermalExpansion=10.0
   leave
 
   set temperatureModel=sineWave
@@ -36,10 +36,13 @@ enter problemParams
 
   set viscosityModel=constant
   enter initialViscosity
-    set viscosityScale=50.0
+    set viscosityScale=1.0
   leave
 
   set boundaryModel=noFlux
+
+  enter solverParams
+  leave
 leave
 
 enter outputParams

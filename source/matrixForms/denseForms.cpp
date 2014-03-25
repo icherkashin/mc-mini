@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cassert>
 
 #include <Eigen/Dense>
 
@@ -10,66 +9,85 @@ using namespace Eigen;
 using namespace std;
 
 namespace DenseForms {
-  void makeA (Ref<MatrixXd> A,
-              const int M,
-              const int N,
-              const double h,
-              const double viscosity) {
-    if (DEBUG) cerr << "Creating A." << endl;
+  void makeStokesMatrix (Ref<MatrixXd> stokesMatrix,
+                         const int M,
+                         const int N,
+                         const double h,
+                         const double * viscosityData) {
+    if (DEBUG) cerr << "Creating stokesMatrix." << endl;
 
+    stokesMatrix = MatrixXd::Zero (3 * M * N - M - N, 3 * M * N - M - N);
 
-    A = MatrixXd::Zero (3 * M * N - M - N, 3 * M * N - M - N);
-
-    makeLaplacianXBlock (A.block (0,                 0,                 M * (N - 1), M * (N - 1)), M, N, h, viscosity);
-    makeLaplacianYBlock (A.block (M * (N - 1),       M * (N - 1),       (M - 1) * N, (M - 1) * N), M, N, h, viscosity);
-    makeGradXBlock      (A.block (0,                 2 * M * N - M - N, M * (N - 1), M * N),       M, N, h);
-    makeGradYBlock      (A.block (M * (N - 1),       2 * M * N - M - N, (M - 1) * N, M * N),       M, N, h);
-    makeDivXBlock       (A.block (2 * M * N - M - N, 0,                  M * N,      M * (N - 1)), M, N, h);
-    makeDivYBlock       (A.block (2 * M * N - M - N, M * (N - 1),        M * N,      (M - 1) * N), M, N, h);
+    makeLaplacianXBlock (stokesMatrix.block (0,                 0,                 M * (N - 1), M * (N - 1)), M, N, h, viscosityData);
+    makeLaplacianYBlock (stokesMatrix.block (M * (N - 1),       M * (N - 1),       (M - 1) * N, (M - 1) * N), M, N, h, viscosityData);
+    makeGradXBlock      (stokesMatrix.block (0,                 2 * M * N - M - N, M * (N - 1), M * N),       M, N, h);
+    makeGradYBlock      (stokesMatrix.block (M * (N - 1),       2 * M * N - M - N, (M - 1) * N, M * N),       M, N, h);
+    makeDivXBlock       (stokesMatrix.block (2 * M * N - M - N, 0,                  M * N,      M * (N - 1)), M, N, h);
+    makeDivYBlock       (stokesMatrix.block (2 * M * N - M - N, M * (N - 1),        M * N,      (M - 1) * N), M, N, h);
   }
 
   void makeLaplacianXBlock (Ref<MatrixXd> laplacian,
                             const int M,
                             const int N,
                             const double h,
-                            const double viscosity) {
+                            const double * viscosityData) {
     if (DEBUG) cerr << "Creating LaplacianXBlock." << endl;
 
-    MatrixXd laplacianBlock = MatrixXd::Zero (N - 1, N - 1);
-
-    laplacianBlock.diagonal ()   = VectorXd::Constant (N - 1, viscosity * 4 / (h * h));
-    laplacianBlock.diagonal (-1) = laplacianBlock.diagonal (1) = VectorXd::Constant (N - 2, -viscosity / (h * h));
-
     for (int i = 0; i < M; ++i) {
-      laplacianBlock.diagonal() = VectorXd::Constant (N - 1, viscosity * 4 / (h * h));
-      if ((i == 0) || (i == M - 1))
-        laplacianBlock.diagonal () = VectorXd::Constant (N - 1, viscosity * 5 / (h * h));
+      for (int j = 0; j < (N - 1); ++j) {
+        double viscosity = (viscosityData [i * (N + 1) + (j + 1)] +
+                            viscosityData [(i + 1) * (N + 1) + (j + 1)]) / 2;
 
-      laplacian.block (i * (N - 1), i * (N - 1), (N - 1), (N - 1)) = laplacianBlock;
+        if (i == 0 || i == (M - 1))
+          laplacian (i * (N - 1) + j, i       * (N - 1) + j)       =  viscosity * 5 / (h * h);
+        else
+          laplacian (i * (N - 1) + j, i       * (N - 1) + j)       =  viscosity * 4 / (h * h);
+
+        if (i > 0)
+          laplacian (i * (N - 1) + j, (i - 1) * (N - 1) + j)       = -viscosity / (h * h);
+
+        if (i < (M - 1))
+          laplacian (i * (N - 1) + j, (i + 1) * (N - 1) + j)       = -viscosity / (h * h);
+
+        if (j > 0)
+          laplacian (i * (N - 1) + j, i       * (N - 1) + (j - 1)) = -viscosity / (h * h);
+
+        if (j < N - 2)
+          laplacian (i * (N - 1) + j, i       * (N - 1) + (j + 1)) = -viscosity / (h * h);
+      }
     }
-
-    laplacian.diagonal (N - 1)    = VectorXd::Constant ((N - 1) * (M - 1), -viscosity / (h * h));
-    laplacian.diagonal (-(N - 1)) = VectorXd::Constant ((N - 1) * (M - 1), -viscosity / (h * h));
-
   }
 
   void makeLaplacianYBlock (Ref<MatrixXd> laplacian,
                             const int M,
                             const int N,
                             const double h,
-                            const double viscosity) {
+                            const double * viscosityData) {
     if (DEBUG) cerr << "Creating LaplacianYBlock." << endl;
-    
-    MatrixXd laplacianBlock = MatrixXd::Zero (N, N);
 
-    laplacianBlock.diagonal () = VectorXd::Constant (N, viscosity * 4 / (h * h));
-    laplacianBlock.diagonal (-1) = laplacianBlock.diagonal (1) = VectorXd::Constant (N - 1, -viscosity / (h * h));
-    laplacianBlock (0, 0) = laplacianBlock (N - 1, N - 1) = viscosity * 5 / (h * h);
+    for (int i = 0; i < (M - 1); ++i) {
+      for (int j = 0; j < N; ++j) {
+        double viscosity = (viscosityData [(i + 1) * (N + 1) + j] +
+                            viscosityData [(i + 1) * (N + 1) + (j + 1)]) / 2;
 
-    for (int i = 0; i < M - 1; ++i)
-      laplacian.block (i * N, i * N, N, N) = laplacianBlock;
+        if ((j == 0) || (j == (N - 1)))
+          laplacian (i * N + j, i       * N + j)       =  viscosity * 5 / (h * h);
+        else
+          laplacian (i * N + j, i       * N + j)       =  viscosity * 4 / (h * h);
 
-    laplacian.diagonal (N) = laplacian.diagonal (-N) = VectorXd::Constant ((M - 2) * N, -viscosity / (h * h));
+        if (j > 0)
+          laplacian (i * N + j, i       * N + (j - 1)) = -viscosity / (h * h);
+
+        if (j < (N - 1))
+          laplacian (i * N + j, i       * N + (j + 1)) = -viscosity / (h * h);
+
+        if (i > 0)
+          laplacian (i * N + j, (i - 1) * N + j)       = -viscosity / (h * h);
+
+        if (i < (M - 2))
+          laplacian (i * N + j, (i + 1) * N + j)       = -viscosity / (h * h);
+      }
+    }
   }
 
   void makeGradXBlock (Ref<MatrixXd> grad,
@@ -78,13 +96,12 @@ namespace DenseForms {
                        const double h) {
     if (DEBUG) cerr << "Creating GradXBLock." << endl;
     
-    MatrixXd gradBlock = MatrixXd::Zero (N - 1, N);
-
-    gradBlock.diagonal()  = VectorXd::Constant (N - 1, -1 / h);
-    gradBlock.diagonal(1) = VectorXd::Constant (N - 1,  1 / h);
-
-    for (int i = 0; i < M; ++i)
-      grad.block (i * (N - 1), i * N, N - 1, N) = gradBlock;
+    for (int i = 0; i < M; ++i) {
+      for (int j = 0; j < (N - 1); ++j) {
+        grad (i * (N - 1) + j, i * N + j)       = -1 / h;
+        grad (i * (N - 1) + j, i * N + (j + 1)) =  1 / h;
+      }
+    }
   }
 
   void makeGradYBlock (Ref<MatrixXd> grad,
@@ -92,9 +109,11 @@ namespace DenseForms {
                        const int N,
                        const double h) {
     if (DEBUG) cerr << "Creating GradYBlock." << endl;
-
-    grad.diagonal()  = VectorXd::Constant ((M - 1) * N, -1 / h);
-    grad.diagonal(N) = VectorXd::Constant ((M - 1) * N,  1 / h); 
+    
+    for (int i = 0; i < (M - 1) * N; ++i) {
+      grad (i, i)     = -1 / h;
+      grad (i, i + N) =  1 / h;
+    }
   }
 
   void makeDivXBlock (Ref<MatrixXd> div,
@@ -103,14 +122,12 @@ namespace DenseForms {
                       const double h) {
     if (DEBUG) cerr << "Creating DivXBLock." << endl;
 
-    div               = MatrixXd::Zero (M * N, M * (N - 1));
-    MatrixXd divBlock = MatrixXd::Zero (N,     N - 1);
-
-    divBlock.diagonal ()   = VectorXd::Constant (N - 1,  1 / h);
-    divBlock.diagonal (-1) = VectorXd::Constant (N - 1, -1 / h);
-
-    for (int i = 0; i < M; ++i)
-      div.block (i * N, i * (N - 1), N, N - 1) = divBlock;
+    for (int i = 0; i < M; ++i) {
+      for (int j = 0; j < (N - 1); ++j) {
+        div (i * N + j,       i * (N - 1) + j) =  1 / h;
+        div (i * N + (j + 1), i * (N - 1) + j) = -1 / h;
+      }
+    }
   }
 
   void makeDivYBlock (Ref<MatrixXd> div,
@@ -118,11 +135,11 @@ namespace DenseForms {
                       const int N,
                       const double h) {
     if (DEBUG) cerr << "Creating DivYBlock." << endl;
-    
-    div = MatrixXd::Zero (M * N, (M - 1) * N);
-
-    div.diagonal ()   = VectorXd::Constant ((M - 1) * N,  1 / h);
-    div.diagonal (-N) = VectorXd::Constant ((M - 1) * N, -1 / h);
+   
+    for (int i = 0; i < (M - 1) * N; ++i) {
+      div (i,     i) =  1 / h;
+      div (i + N, i) = -1 / h;
+    }
   }
 
   void makeForcingMatrix (Ref<MatrixXd> forcingMatrix,
@@ -132,20 +149,21 @@ namespace DenseForms {
 
     forcingMatrix = MatrixXd::Zero (3 * M * N - M - N, 2 * M * N - M - N);
 
-    forcingMatrix.block (0, 0, 2 * M * N - M - N, 2 * M * N - M - N) = MatrixXd::Identity (2 * M * N - M - N, 2 * M * N - M - N);
+    for (int i = 0; i < 2 * M * N - M - N; ++i)
+      forcingMatrix (i, i) = 1;
   }
 
   void makeBoundaryMatrix (Ref<MatrixXd> boundaryMatrix,
                            const int M,
                            const int N,
                            const double h,
-                           const double viscosity) {
+                           const double * viscosityData) {
     if (DEBUG) cerr << "Creating BoundaryMatrix." << endl;
     
     boundaryMatrix = MatrixXd::Zero (3 * M * N - M - N, 2 * M + 2 * N);
 
-    makeBCLaplacianXBlock (boundaryMatrix.block (0,                 0,     M * (N - 1), 2 * M), M, N, h, viscosity);
-    makeBCLaplacianYBlock (boundaryMatrix.block (M * (N - 1),       2 * M, (M - 1) * N, 2 * N), M, N, h, viscosity);
+    makeBCLaplacianXBlock (boundaryMatrix.block (0,                 0,     M * (N - 1), 2 * M), M, N, h, viscosityData);
+    makeBCLaplacianYBlock (boundaryMatrix.block (M * (N - 1),       2 * M, (M - 1) * N, 2 * N), M, N, h, viscosityData);
     makeBCDivXBlock       (boundaryMatrix.block (2 * M * N - M - N, 0,     M * N,       2 * M), M, N, h);
     makeBCDivYBlock       (boundaryMatrix.block (2 * M * N - M - N, 2 * M, M * N,       2 * N), M, N, h);
   }
@@ -154,32 +172,32 @@ namespace DenseForms {
                               const int M,
                               const int N,
                               const double h,
-                              const double viscosity) {
+                              const double * viscosityData) {
     if (DEBUG) cerr << "Creating BCLaplacianXBlock." << endl;
-    
-    laplacianBC               = MatrixXd::Zero (M * (N - 1), 2 * M);
-    MatrixXd laplacianBCBlock = MatrixXd::Zero (N - 1,       2);
-
-    laplacianBCBlock (0, 0) = laplacianBCBlock (N - 2, 1) = viscosity / (h * h);
-
-    for (int i = 0; i < M; ++i)
-      laplacianBC.block (i * (N - 1), i * 2, N - 1, 2) = laplacianBCBlock;
+   
+    for (int i = 0; i < M; ++i) {
+      for (int j = 0; j < 2; ++j) {
+        double viscosity = (viscosityData [i *       (N + 1) + j * N] +
+                            viscosityData [(i + 1) * (N + 1) + j * N]) / 2;
+        laplacianBC (i * (N - 1) + j * (N - 2), i * 2 + j) = viscosity / (h * h);
+      }
+    }
   }
 
   void makeBCLaplacianYBlock (Ref<MatrixXd> laplacianBC,
                               const int M,
                               const int N,
                               const double h,
-                              const double viscosity) {
+                              const double * viscosityData) {
     if (DEBUG) cerr << "Creating BCLaplacianYBlock." << endl;
-    
-    laplacianBC               = MatrixXd::Zero ((M - 1) * N, 2 * N);
-    MatrixXd laplacianBCBlock = MatrixXd::Zero (N,           N);
-
-    laplacianBCBlock.diagonal() = VectorXd::Constant (N, viscosity / (h * h));
-
-    laplacianBC.block (0,           0, N, N) = laplacianBCBlock;
-    laplacianBC.block ((M - 2) * N, N, N, N) = laplacianBCBlock;
+  
+    for (int i = 0; i < 2; ++i) {
+      for (int j = 0; j < N; ++j) {
+        double viscosity = (viscosityData [(i * M) * (N + 1) + j] +
+                            viscosityData [(i * M) * (N + 1) + (j - 1)]) / 2;
+        laplacianBC (i * (M - 2) * N + j, i * N + j) = viscosity / (h * h);
+      }
+    }
   }
 
   void makeBCDivXBlock (Ref<MatrixXd> divBC,
@@ -187,14 +205,11 @@ namespace DenseForms {
                         const int N,
                         const double h) {
     if (DEBUG) cerr << "Creating BCDivXBlock." << endl;
-    divBC               = MatrixXd::Zero (M * N, 2 * M);
-    MatrixXd divBCBlock = MatrixXd::Zero (N,     2);
-
-    divBCBlock (0,     0) =  1 / h; 
-    divBCBlock (N - 1, 1) = -1 / h;
-
-    for (int i = 0; i < M; ++i)
-      divBC.block (i * N, i * 2, N, 2) = divBCBlock;
+  
+    for (int i = 0; i < M; ++i) {
+      divBC (i *       N,     i * 2)     =  1 / h;
+      divBC ((i + 1) * N - 1, i * 2 + 1) = -1 / h;
+    }
   }
 
   void makeBCDivYBlock (Ref<MatrixXd> divBC,
@@ -202,10 +217,11 @@ namespace DenseForms {
                         const int N,
                         const double h) {
     if (DEBUG) cerr << "Creating BCDivYBlock." << endl;
-    divBC = MatrixXd::Zero (M * N, 2 * N);
-
-    divBC.block (0,           0, N, N) =  1 / h * MatrixXd::Identity (N, N);
-    divBC.block ((M - 1) * N, N, N, N) = -1 / h * MatrixXd::Identity (N, N);
+  
+    for (int i = 0; i < N; ++i) {
+      divBC (              i,     i) =  1 / h;
+      divBC ((M - 1) * N + i, N + i) = -1 / h;
+    }
   }
 }
 

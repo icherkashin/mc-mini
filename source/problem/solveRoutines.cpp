@@ -10,6 +10,7 @@
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
+#include "debug.h"
 
 using namespace Eigen;
 using namespace std;
@@ -25,7 +26,7 @@ using namespace std;
 void ProblemStructure::updateForcingTerms() {
   double * uForcingData = geometry.getUForcingData();
   double * vForcingData = geometry.getVForcingData();
-  
+
   if (forcingModel == "tauBenchmark") {
     // Benchmark taken from Tau (1991; JCP Vol. 99)
     for (int i = 0; i < M; ++i)
@@ -89,10 +90,17 @@ void ProblemStructure::updateForcingTerms() {
 void ProblemStructure::solveStokes() {
   Map<VectorXd> stokesSolnVector (geometry.getStokesData(), M * (N - 1) + (M - 1) * N + M * N);
   
+  #ifndef USE_DENSE
   static SparseMatrix<double> stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
   static SparseMatrix<double> forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
   static SparseMatrix<double> boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
   static SparseLU<SparseMatrix<double>, COLAMDOrdering<int> > solver;
+  #else
+  static MatrixXd stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
+  static MatrixXd forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
+  static MatrixXd boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
+  static PartialPivLU<MatrixXd> solver;
+  #endif
 
   static bool initialized;
 
@@ -100,6 +108,7 @@ void ProblemStructure::solveStokes() {
 
   if (!(initialized) || !(viscosityModel=="constant")) {
 
+  #ifndef USE_DENSE
     SparseForms::makeStokesMatrix   (stokesMatrix,   M, N, h, viscosityData);
     stokesMatrix.makeCompressed();
     SparseForms::makeForcingMatrix  (forcingMatrix,  M, N);
@@ -109,7 +118,13 @@ void ProblemStructure::solveStokes() {
 
     solver.analyzePattern (stokesMatrix);
     solver.factorize (stokesMatrix);
-    
+  #else
+    DenseForms::makeStokesMatrix   (stokesMatrix, M, N, h, viscosityData);
+    DenseForms::makeForcingMatrix  (forcingMatrix, M, N);
+    DenseForms::makeBoundaryMatrix (boundaryMatrix, M, N, h, viscosityData);
+
+    solver.compute (stokesMatrix);
+  #endif
     initialized = true;
   }
 
@@ -124,6 +139,6 @@ void ProblemStructure::solveStokes() {
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
-  upwindMethod();
+  frommMethod();
   backwardEuler();
 }

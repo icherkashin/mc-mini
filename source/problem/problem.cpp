@@ -80,12 +80,18 @@ void ProblemStructure::recalculateTimestep() {
   double maxInteriorVVelocity = vVelocityVector.maxCoeff();
   double maxBoundaryVVelocity = vVelocityBoundaryVector.maxCoeff();
   double maxVVelocity = (maxInteriorVVelocity > maxBoundaryVVelocity) ? maxInteriorVVelocity : maxBoundaryVVelocity;
-  double velocityDeltaT = cfl * h / sqrt (maxUVelocity * maxUVelocity + maxVVelocity * maxVVelocity);
+  double advectionDeltaT = cfl * h / sqrt (maxUVelocity * maxUVelocity + maxVVelocity * maxVVelocity);
   if (maxUVelocity == 0 || maxVVelocity == 0)
-    velocityDeltaT = INT_MAX;
+    advectionDeltaT = INT_MAX;
   double diffusionDeltaT = cfl * h / diffusivity;
 
-  deltaT = (velocityDeltaT < diffusionDeltaT) ? velocityDeltaT : diffusionDeltaT;
+  if (advectionDeltaT < diffusionDeltaT) {
+    deltaT = advectionDeltaT;
+  } else {
+    deltaT = diffusionDeltaT;
+  }
+
+  if (time + deltaT > endTime) { deltaT = endTime - time; }
 }
 
 double ProblemStructure::getH() {

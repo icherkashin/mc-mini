@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fstream>
+
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
@@ -31,4 +33,6 @@ class OutputStructure {
     string outputFormat;
     string outputPath;
     string outputFilename;
+
+    std::ofstream problemXdmfFile;
 };

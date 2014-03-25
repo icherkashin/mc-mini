@@ -112,3 +112,80 @@ void ProblemStructure::backwardEuler() {
   solver.compute (lhs);
   temperatureVector =  solver.solve(temporaryVector + rhsBoundary * temperatureBoundaryVector);
 }
+
+void ProblemStructure::crankNicolson() {
+  Map<VectorXd> temperatureVector (geometry.getTemperatureData(), M * N);
+  Map<VectorXd> temperatureBoundaryVector (geometry.getTemperatureBoundaryData(), 2 * M);
+
+  double mu = deltaT * diffusivity / (2 * h * h);
+
+  SparseMatrix<double> rhs;
+  SparseMatrix<double> rhsBoundary;
+  rhs.resize (M * N, M * N);
+  rhsBoundary.resize (M * N, 2 * N);
+
+  vector<Triplet<double> > tripletList;
+  tripletList.reserve (5 * M * N);
+
+  for (int i = 0; i < M; i++)
+    for (int j = 0; j < N; ++j) {
+      if ((j == 0) || (j == (N - 1)))
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + j, 1 - 3 * mu)); 
+      else
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + j, 1 - 4 * mu));
+      if (j > 0) 
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + (j - 1), mu));
+      if (j < (N - 1)) 
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + (j + 1), mu));
+      if (i > 0)
+        tripletList.push_back (Triplet<double> (i * N + j, (i - 1) * N + j, mu));
+      if (i < (M - 1))
+        tripletList.push_back (Triplet<double> (i * N + j, (i + 1) * N + j, mu));
+    }
+
+  rhs.setFromTriplets (tripletList.begin(), tripletList.end());
+  rhs.makeCompressed();
+
+  tripletList.clear();
+  tripletList.reserve (2 * N);
+
+  for (int j = 0; j < N; ++j) {
+    tripletList.push_back (Triplet<double> (j,               j,     mu));
+    tripletList.push_back (Triplet<double> ((M - 1) * N + j, N + j, mu));
+  }
+
+  rhsBoundary.setFromTriplets (tripletList.begin(), tripletList.end());
+  rhsBoundary.makeCompressed();
+
+  VectorXd temporaryVector = rhs * temperatureVector + rhsBoundary * temperatureBoundaryVector;
+  
+  SparseMatrix<double> lhs;
+  lhs.resize (M * N, M * N);
+  rhsBoundary.resize (M * N, 2 * M);
+
+  tripletList.clear();
+  tripletList.reserve (5 * M * N);
+
+  for (int i = 0; i < M; i++)
+    for (int j = 0; j < N; ++j) {
+      if ((j == 0) || (j == (N - 1)))
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + j, 1 + 3 * mu)); 
+      else
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + j, 1 + 4 * mu));
+      if (j > 0) 
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + (j - 1), -mu));
+      if (j < (N - 1)) 
+        tripletList.push_back (Triplet<double> (i * N + j, i * N + (j + 1), -mu));
+      if (i > 0)
+        tripletList.push_back (Triplet<double> (i * N + j, (i - 1) * N + j, -mu));
+      if (i < (M - 1))
+        tripletList.push_back (Triplet<double> (i * N + j, (i + 1) * N + j, -mu));
+    }
+
+  lhs.setFromTriplets (tripletList.begin(), tripletList.end());
+  lhs.makeCompressed();
+  
+  SimplicialLLT<SparseMatrix<double> > solver;
+  solver.compute (lhs);
+  temperatureVector =  solver.solve(temporaryVector + rhsBoundary * temperatureBoundaryVector);
+}

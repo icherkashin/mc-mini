@@ -31,7 +31,13 @@ DefineScalarExpression("Velocity", \
 DefineScalarExpression("VelocityMagnitude", \
                        "UVelocity * UVelocity + VVelocity * VVelocity")
 
-AddPlot("Pseudocolor", "Velocity")
+DefineScalarExpression("TemperatureMagnitude", \
+                       "abs(Temperature)")
+
+DefineScalarExpression("TemperatureSquare", \
+                       "Temperature * Temperature");
+
+AddPlot("Pseudocolor", "TemperatureMagnitude")
 
 file = open(out_file, 'w')
 file.write("refinement\tMaxNorm\t\tOneNorm\t\tTwoNorm\n")
@@ -49,7 +55,7 @@ for state in range(TimeSliderGetNStates()):
 
   Query("Max")
   maxNorm = GetQueryOutputValue()
-  if (oldMax != 0):
+  if (oldMax != 0) and (maxNorm != 0):
     maxRate = log(oldMax / maxNorm) / log(2)
   else:
     maxRate = 0
@@ -57,13 +63,13 @@ for state in range(TimeSliderGetNStates()):
 
   Query("Variable Sum")
   oneNorm = GetQueryOutputValue() / nZones
-  if (oldOne != 0):
+  if (oldOne != 0) and (oneNorm != 0):
     oneRate = log(oldOne / oneNorm) / log(2)
   else:
     oneRate = 0
   oldOne = oneNorm
 
-  AddPlot("Pseudocolor", "VelocityMagnitude")
+  AddPlot("Pseudocolor", "TemperatureSquare")
   DrawPlots()
   Query("Variable Sum")
   twoNorm = sqrt (GetQueryOutputValue() / (nZones))

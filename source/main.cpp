@@ -26,7 +26,7 @@ int main(int argc, char ** argv) {
     exit (-1);
   }
 
-  setNbThreads(8);
+  setNbThreads(16);
 
   ParamParser parser(string{argv[1]});
   GeometryStructure geometry (parser);
@@ -38,10 +38,11 @@ int main(int argc, char ** argv) {
   problem.updateForcingTerms();
   problem.solveStokes();
 
+  problem.recalculateTimestep();
   
-  while (problem.advanceTimestep()) {
+  do {    
     output.writeHDF5File (problem.getTimestepNumber());
-    
+    cerr << "Timestep: " << problem.getTimestepNumber() << "; t = " << problem.getTime() << endl;
     problem.updateForcingTerms();
     problem.solveStokes();
     problem.recalculateTimestep();
@@ -49,29 +50,10 @@ int main(int argc, char ** argv) {
 
   } while (problem.advanceTimestep());
 
+  output.writeHDF5File (problem.getTimestepNumber());
+  cerr << "Timestep: " << problem.getTimestepNumber() << "; t = " << problem.getTime() << endl;
+
   output.writeHDF5File();
-  
-  int M = geometry.getM();
-  int N = geometry.getN();
-  double h = problem.getH();
-
-  MatrixXd analyticU;
-  Map<Matrix<double, Dynamic, Dynamic, RowMajor> > uSolnMatrix (geometry.getUVelocityData(), M, (N - 1));
-  analyticU.resizeLike(uSolnMatrix);
-  for (int i = 0; i < M; ++i)
-    for (int j = 0; j < N - 1; ++j)
-      analyticU (i, j) = cos ((j + 1) * h) * sin ((i + 0.5) * h);
-
-  MatrixXd analyticV;
-  Map<Matrix<double, Dynamic, Dynamic, RowMajor> > vSolnMatrix (geometry.getVVelocityData(), (M - 1), N);
-  analyticV.resizeLike(vSolnMatrix);
-  for (int i = 0; i < M - 1; ++i)
-    for (int j = 0; j < N; ++j)
-      analyticV (i, j) = - sin ((j + 0.5) * h) * cos ((i + 1) * h);
-
-  cout << sqrt((uSolnMatrix - analyticU).squaredNorm() * h * h) 
-       << "\t" 
-       << sqrt((vSolnMatrix - analyticV).squaredNorm() * h * h) << endl;
   
   return 0;
 }

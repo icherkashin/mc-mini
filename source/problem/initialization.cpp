@@ -112,6 +112,7 @@ void ProblemStructure::initializeVelocityBoundary() {
   double * uVelocityBoundaryData = geometry.getUVelocityBoundaryData();
   double * vVelocityBoundaryData = geometry.getVVelocityBoundaryData();
 
+
   if (boundaryModel == "tauBenchmark") {
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < 2; ++j)

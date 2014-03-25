@@ -25,6 +25,9 @@ class ProblemStructure {
 
     // Advection methods
     void upwindMethod();
+    void laxWendroff();
+    void frommMethod();
+    void frommVanLeer();
 
     // Diffusion methods
     void forwardEuler();
