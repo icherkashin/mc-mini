@@ -61,3 +61,8 @@ style :
 
 test :
 	@echo $(SRC_DIR) $(SRC_DIRS) $(SOURCES)
+# DO NOT DELETE
+
+source/geometry/geometry.o: include/geometry/geometry.h
+source/geometry/geometry.o: include/parser/parser.h
+source/geometry/geometry.o: include/parser/paramTree.h

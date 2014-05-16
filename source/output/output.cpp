@@ -36,6 +36,13 @@ OutputStructure::OutputStructure (ParamParser&       pp,
     parser.pop();
   }
 
+  char s[128];
+  sprintf (s, "test -e %s", outputPath.c_str());
+  if (system (s) == 1) {
+    sprintf (s, "mkdir %s", outputPath.c_str());
+    system (s);
+  }
+
   problemXdmfFile.open ((outputPath + "/" + outputFilename + "-series.xdmf").c_str(), ofstream::out);
   problemXdmfFile << "<?xml version=\"1.0\"?>" << endl
                   << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>" << endl
@@ -72,6 +79,7 @@ void OutputStructure::writeDefaultFile (const int timestep) {
 }
 
 void OutputStructure::writeHDF5File() {
+  
   H5File outputFile (H5std_string (outputPath + "/" +
                                    outputFilename + ".h5"), H5F_ACC_TRUNC);
   

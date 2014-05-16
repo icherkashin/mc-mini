@@ -8,6 +8,7 @@
 #include "matrixForms/sparseForms.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
+#include "debug.h"
 
 using namespace Eigen;
 using namespace std;
@@ -88,8 +89,8 @@ void ProblemStructure::laxWendroff() {
 }
 
 void ProblemStructure::frommMethod() {
-  Map<VectorXd> temperatureVector (geometry.getTemperatureData(), M * N);
-  Map<VectorXd> temperatureBoundaryVector (geometry.getTemperatureBoundaryData(), 2 * M);
+  double * temperatureData = geometry.getTemperatureData();
+  double * temperatureBoundaryData = geometry.getTemperatureBoundaryData();
   
   double * uVelocityData = geometry.getUVelocityData();
   double * vVelocityData = geometry.getVVelocityData();
@@ -97,45 +98,22 @@ void ProblemStructure::frommMethod() {
   double * vVelocityBoundaryData = geometry.getVVelocityBoundaryData();
 
   // Initilize half-time data
-  static double * halfTimeTemperatureData;
-  static double * halfTimeForcingData;
-  static double * halfTimeStokesSolnData;
+  static double * halfTimeTemperatureData = new double[M * N];
+  static double * halfTimeUOffsetTemperatureData = new double[M * (N - 1)];
+  static double * halfTimeVOffsetTemperatureData = new double[(M - 1) * N];
+  static double * halfTimeForcingData = new double[2 * M * N - M - N];
+  static double * halfTimeStokesSolnData = new double[3 * M * N - M - N];
+  // Cell-centered velocities at time t^n
+  static double * cellCenteredVelocityData = new double[2 * M * N];
+  static double * cellCenteredUVelocity = cellCenteredVelocityData;
+  static double * cellCenteredVVelocity = cellCenteredVelocityData + M * N;
 
-  // Initialize half-time solver
-
-  static SparseMatrix<double> stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
-  static SparseMatrix<double> forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
-  static SparseMatrix<double> boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
-  static SparseLU<SparseMatrix<double>, COLAMDOrdering<int> > solver;
-
-  static bool initialized;
-
-  if (!(initialized) || !(viscosityModel=="constant")) {
-    halfTimeTemperatureData = new double[M * N];
-    halfTimeForcingData = new double[2 * M * N - M - N];
-    halfTimeStokesSolnData = new double[3 * M * N - M - N];
-    
-    double * viscosityData = geometry.getViscosityData();
-
-    SparseForms::makeStokesMatrix (stokesMatrix, M, N, h, viscosityData);
-    stokesMatrix.makeCompressed();
-    SparseForms::makeForcingMatrix (forcingMatrix, M, N);
-    forcingMatrix.makeCompressed();
-    SparseForms::makeBoundaryMatrix (boundaryMatrix, M, N, h, viscosityData);
-    boundaryMatrix.makeCompressed();
-
-    solver.analyzePattern (stokesMatrix);
-    solver.factorize      (stokesMatrix);
-
-    initialized = true;
-  }
-  
   Map<VectorXd> halfTimeStokesSolnVector (halfTimeStokesSolnData, 3 * M * N - M - N);
   
-  // Calculate half-time temperature data
-  double leftNeighbor, rightNeighbor, bottomNeighbor, topNeighbor;
   double leftVelocity, rightVelocity, bottomVelocity, topVelocity;
-
+  double leftNeighborT, rightNeighborT, bottomNeighborT, topNeighborT;
+  
+  // Calculate cell-centered velocities
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
       leftVelocity   = (j == 0) ?
@@ -151,25 +129,166 @@ void ProblemStructure::frommMethod() {
                         vVelocityBoundaryData [N + j] :
                         vVelocityData [i * N + j];
       
-      leftNeighbor   = (j == 0) ?
-                        temperatureVector (i * N + j) :
-                        temperatureVector (i * N + (j - 1));
-      rightNeighbor  = (j == (N - 1)) ?
-                        temperatureVector (i * N + j) :
-                        temperatureVector (i * N + (j + 1));
-      bottomNeighbor = (i == 0) ?
-                        temperatureBoundaryVector (j) :
-                        temperatureVector ((i - 1) * N + j);
-      topNeighbor    = (i == (M - 1)) ?
-                        temperatureBoundaryVector (N + j) :
-                        temperatureVector ((i + 1) * N + j);
-      
-      halfTimeTemperatureData [i * N + j] = 
-        temperatureVector (i * N + j) - deltaT / 2 * 
-        ((leftVelocity + rightVelocity) * (rightNeighbor - leftNeighbor) / (2 * h) + 
-         (topVelocity + bottomVelocity) * (topNeighbor - bottomNeighbor) / (2 * h) -
-         diffusivity * (topNeighbor + bottomNeighbor + leftNeighbor + rightNeighbor - 4 * temperatureVector (i * N + j)));
+      cellCenteredVVelocity[i * N + j] = 0.5 * (topVelocity + bottomVelocity);
+      cellCenteredUVelocity[i * N + j] = 0.5 * (leftVelocity + rightVelocity);
     }
+  }
+  
+  // Calculate temperatures at half-time level
+  // Loop over U-velocity positions
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < (N - 1); ++j) {
+      halfTimeUOffsetTemperatureData[i * (N - 1) + j] = 0;
+      // Flag to show which Riemann Problem solution to use
+      int riemannFlag;
+      if (cellCenteredUVelocity[i * N + j] > 0 && cellCenteredUVelocity[i * N + (j + 1)] > 0) {
+        riemannFlag = 0b01;
+      } else if (cellCenteredUVelocity[i * N + j] < 0 && cellCenteredUVelocity[i * N + (j + 1)] < 0) {
+        riemannFlag = 0b10;
+      } else {
+        riemannFlag = 0b11;
+      }
+
+      if (riemannFlag & 0b01) {
+        if (j == 0) {
+          leftNeighborT = temperatureData[i * N + j];
+        } else {
+          leftNeighborT = temperatureData[i * N + (j - 1)];
+        }
+        rightNeighborT = temperatureData[i * N + (j + 1)];
+
+        halfTimeUOffsetTemperatureData[i * (N - 1) + j] += 
+            temperatureData[i * N + j] + 
+              (h / 2 - deltaT / 2 * cellCenteredUVelocity[i * N + j]) * (rightNeighborT - leftNeighborT) / (2 * h);
+      }
+      if (riemannFlag & 0b10) {
+        leftNeighborT = temperatureData[i * N + j];
+        if (j == (N - 2)) {
+          rightNeighborT = temperatureData[i * N + (j + 1)];
+        } else {
+          rightNeighborT = temperatureData[i * N + (j + 2)];
+        }
+
+        halfTimeUOffsetTemperatureData[i * (N - 1) + j] += 
+            temperatureData[i * N + (j + 1)] -
+              (h / 2 - deltaT / 2 * cellCenteredUVelocity[i * N + (j + 1)]) * (rightNeighborT - leftNeighborT) / (2 * h); 
+      
+      }
+      if (riemannFlag == 0b11) {
+        halfTimeUOffsetTemperatureData[i * (N - 1) + j] /= 2;
+      }
+
+      if (j == 0) {
+        leftNeighborT = temperatureData[i * N + j];
+      } else {
+        leftNeighborT = temperatureData[i * N + (j - 1)];
+      }
+      rightNeighborT = temperatureData[i * N + (j + 1)]; 
+      if (i == 0) {
+        bottomNeighborT = temperatureData[i * N + j];
+      } else {
+        bottomNeighborT = temperatureData[(i - 1) * N + j];
+      }
+      if (i == (M - 1)) {
+        topNeighborT = temperatureData[i * N + j];
+      } else {
+        topNeighborT = temperatureData[(i + 1) * N + j];
+      }
+    }
+  }
+
+  // Loop over V-velocity positions
+  for (int i = 0; i < (M - 1); ++i) {
+    for (int j = 0; j < N; ++j) {
+      halfTimeVOffsetTemperatureData[i * N + j] = 0;
+      // Flag to show which Riemann Problem solution to use
+      int riemannFlag;
+      if (cellCenteredVVelocity[i * N + j] > 0 && cellCenteredVVelocity[i * (N + 1) + j] > 0) {
+        riemannFlag = 0b01;
+      } else if (cellCenteredVVelocity[i * N + j] < 0 && cellCenteredVVelocity[i * (N + 1) + j] > 0) {
+        riemannFlag = 0b10;
+      } else {
+        riemannFlag = 0b11;
+      }
+
+      // Calculate T_bottom
+      if (riemannFlag & 0b01) {
+        if (i == 0) {
+          bottomNeighborT = temperatureData[i * N + j];
+        } else {
+          bottomNeighborT = temperatureData[(i - 1) * N + j];
+        }
+        topNeighborT = temperatureData[(i + 1) * N + j];
+
+        halfTimeVOffsetTemperatureData[i * N + j] +=
+            temperatureData[i * N + j] +
+              (h / 2 - deltaT / 2 * cellCenteredVVelocity[i * N + j]) * (topNeighborT - bottomNeighborT) / (2 * h);
+      }
+      
+      // Calculate T_top
+      if (riemannFlag & 0b10) {
+        bottomNeighborT = temperatureData[i * N + j];
+        if (i == (N - 1)) {
+          topNeighborT = temperatureData[i * N + j];
+        } else {
+          topNeighborT = temperatureData[(i + 1) * N + j];
+        }
+
+        halfTimeVOffsetTemperatureData[i * N + j] += 
+            temperatureData[(i + 1) * N + j] -
+              (h / 2 - deltaT / 2 * cellCenteredVVelocity[(i + 1) * N + j]) * (topNeighborT - bottomNeighborT) / (2 * h);
+
+      }
+      // Average T_bottom and T_top
+      if (riemannFlag == 0b11) {
+        halfTimeVOffsetTemperatureData[i * N + j] /= 2;
+      }
+
+      if (j == 0) {
+        leftNeighborT = temperatureData[i * N + j];
+      } else {
+        leftNeighborT = temperatureData[i * N + (j - 1)];
+      }
+      if (j == (N - 1)) {
+        rightNeighborT = temperatureData[i * N + j];
+      } else {
+        rightNeighborT = temperatureData[i * N + (j + 1)];
+      }
+    }
+  }
+  
+  for (int i = 0; i < M; ++i) {
+    for (int j = 0; j < N; ++j) {
+      if (j == 0) {
+        leftNeighborT = temperatureData[i * N + j]; 
+      } else {
+        leftNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + (j - 1)]; 
+      }
+      if (j == (N - 1)) {
+        rightNeighborT = temperatureData[i * N + j]; 
+      } else {
+        rightNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + j];
+      }
+
+      if (i == 0) {
+        bottomNeighborT = temperatureBoundaryData[j];
+      } else {
+        bottomNeighborT = halfTimeVOffsetTemperatureData[(i - 1) * N + j];
+      }
+
+      if (i == (M - 1)) {
+        topNeighborT = temperatureBoundaryData[N + j];
+      } else {
+        topNeighborT = halfTimeVOffsetTemperatureData[i * N + j];
+      }
+
+      halfTimeTemperatureData[i * N + j] = (rightNeighborT + leftNeighborT + topNeighborT + bottomNeighborT) / 4;
+    }
+  }
+  
+  if (DEBUG) {
+    std::cout << "<Half-Time Temperature Data>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (halfTimeTemperatureData, M, N) << std::endl << std::endl;
   }
   
   // Calculate half-time forcing
@@ -202,6 +321,48 @@ void ProblemStructure::frommMethod() {
                                           ((halfTimeTemperatureData [i * N + j] +
                                             halfTimeTemperatureData [(i + 1) * N + j]) / 2 - 
                                            referenceTemperature));
+  if (DEBUG) {
+    std::cout << "<Half-Time U Forcing Data>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (halfTimeUForcingData, M, N - 1) << std::endl << std::endl;
+
+    std::cout << "<Half-Time V Forcing Data>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (halfTimeVForcingData, M - 1, N) << std::endl << std::endl;
+  }
+
+  // Initialize half-time solver
+  static SparseMatrix<double> stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
+  static SparseMatrix<double> forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
+  static SparseMatrix<double> boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
+  static SparseLU<SparseMatrix<double>, COLAMDOrdering<int> > solver;
+
+  static bool initialized;
+
+  if (!(initialized) || !(viscosityModel=="constant")) {
+    
+    double * viscosityData = geometry.getViscosityData();
+
+    SparseForms::makeStokesMatrix (stokesMatrix, M, N, h, viscosityData);
+    stokesMatrix.makeCompressed();
+    SparseForms::makeForcingMatrix (forcingMatrix, M, N);
+    forcingMatrix.makeCompressed();
+    SparseForms::makeBoundaryMatrix (boundaryMatrix, M, N, h, viscosityData);
+    boundaryMatrix.makeCompressed();
+
+    solver.analyzePattern (stokesMatrix);
+    solver.factorize      (stokesMatrix);
+
+    initialized = true;
+
+    if (DEBUG) {
+      std::cout << "<Viscosity Data>" << std::endl;
+      std::cout << Eigen::Map<Eigen::MatrixXd> (viscosityData, M, N) << std::endl << std::endl;
+    }
+  }
+
+  if (DEBUG) {
+    std::cout << Eigen::Map<Eigen::MatrixXd> (geometry.getVelocityBoundaryData(), M, 2) << std::endl <<std::endl;
+    std::cout << Eigen::Map<Eigen::MatrixXd> (geometry.getVelocityBoundaryData() + 2 * M, 2, N) << std::endl << std::endl;
+  }
 
   // Solve stokes at the half-time to find velocities
   halfTimeStokesSolnVector = solver.solve 
@@ -210,50 +371,81 @@ void ProblemStructure::frommMethod() {
 
   double * halfTimeUVelocity = halfTimeStokesSolnData;
   double * halfTimeVVelocity = halfTimeStokesSolnData + M * (N - 1);
+  for (int i = 0; i < M; i++)
+    for (int j = 0; j < (N - 1); j++)
+      if (abs(halfTimeUVelocity[i * (N - 1) + j]) < 10E-10)
+        halfTimeUVelocity[i * (N - 1) + j] = 0;
 
-  // Use the half-time temperature and velocity to find the second-order next timestep.
-  VectorXd temporaryVector = temperatureVector;
-  
-  double leftHalfTimeNeighbor, rightHalfTimeNeighbor, 
-         bottomHalfTimeNeighbor, topHalfTimeNeighbor;
+  for (int i = 0; i < (M - 1); i++) 
+    for (int j = 0; j < N; ++j)
+      if (abs (halfTimeVVelocity[i * N + j]) < 10E-10)
+        halfTimeVVelocity[i * N + j] = 0;
 
+  if (DEBUG) {
+    std::cout << "<Half-Time U Velocity>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (halfTimeUVelocity, M, N - 1) << std::endl << std::endl;
+
+    std::cout << "<Half-Time V Velocity>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (halfTimeVVelocity, M - 1, N) << std::endl << std::endl;
+  }
+
+  // Solve for full-time temperature
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
-      leftHalfTimeNeighbor   = (j == 0) ?
-                                halfTimeTemperatureData [i * N + j] :
-                                halfTimeTemperatureData [i * N + (j - 1)];
-      rightHalfTimeNeighbor  = (j == (N - 1)) ?
-                                halfTimeTemperatureData [i * N + j] :
-                                halfTimeTemperatureData [i * N + (j + 1)];
-      bottomHalfTimeNeighbor = (i == 0) ?
-                                temperatureBoundaryVector (j) :
-                                halfTimeTemperatureData [(i - 1) * N + j];
-      topHalfTimeNeighbor    = (i == (M - 1)) ?
-                                temperatureBoundaryVector (N + j) :
-                                halfTimeTemperatureData [(i + 1) * N + j];
-      
-      leftVelocity   = (j == 0) ?
-                        uVelocityBoundaryData [2 * i] :
-                        halfTimeUVelocity [i * (N - 1) + (j - 1)];
-      rightVelocity  = (j == (N - 1)) ?
-                        uVelocityBoundaryData [2 * i + 1] :
-                        halfTimeUVelocity [i * (N - 1) + j];
-      bottomVelocity = (i == 0) ?
-                        vVelocityBoundaryData [j] :
-                        halfTimeVVelocity [(i - 1) * N + j];
-      topVelocity    = (i == (M - 1)) ?
-                        vVelocityBoundaryData [N + j] :
-                        halfTimeVVelocity [i * N + j];
+      if (j == 0) {
+        leftNeighborT = 0; //halfTimeUOffsetTemperatureData[i * (N - 1) + j];
+        leftVelocity = 0;
+      } else {
+        leftNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + (j - 1)]; 
+        leftVelocity = halfTimeUVelocity[i * (N - 1) + (j - 1)];
+      }
+      if (j == (N - 1)) {
+        rightNeighborT = 0; //halfTimeUOffsetTemperatureData[i * (N - 1) + (j - 1)];
+        rightVelocity = 0;
+      } else {
+        rightNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + j];
+        rightVelocity = halfTimeUVelocity[i * (N - 1) + j];
+      }
 
-      temperatureVector (i * N + j) = temporaryVector (i * N + j) + deltaT / h * 
-        (leftVelocity * (leftHalfTimeNeighbor + halfTimeTemperatureData [i * N + j]) / 2 -
-         rightVelocity * (rightHalfTimeNeighbor + halfTimeTemperatureData [i * N + j]) / 2 +
-         bottomVelocity * (bottomHalfTimeNeighbor + halfTimeTemperatureData [i * N + j]) / 2 -
-         topVelocity * (topHalfTimeNeighbor + halfTimeTemperatureData [i * N + j]) / 2);
+      if (i == 0) {
+        bottomNeighborT = 0; // halfTimeVOffsetTemperatureData[i * N + j];
+        bottomVelocity = 0;
+      } else {
+        bottomNeighborT = halfTimeVOffsetTemperatureData[(i - 1) * N + j];
+        bottomVelocity = halfTimeVVelocity[(i - 1) * N + j];
+      }
+
+      if (i == (M - 1)) {
+        topNeighborT = 0; // halfTimeVOffsetTemperatureData[i * N + j];
+        topVelocity = 0;
+      } else {
+        topNeighborT = halfTimeVOffsetTemperatureData[i * N + j];
+        topVelocity = halfTimeVVelocity[i * N + j];
+      }
+      temperatureData[i * N + j] += deltaT / h * (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT) + deltaT / h * (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT);
+
+      if (std::isnan((double)temperatureData[i * N + j])) {
+        if (DEBUG) {
+          std::cout << "<NaN at  = " << i << ", j = " << j << ">" << std::endl;
+          std::cout << "<Neighbor values were: " << std::endl;
+          std::cout << "\tleftNeighborT   = " << leftNeighborT << std::endl;
+          std::cout << "\trightNeighborT  = " << rightNeighborT << std::endl;
+          std::cout << "\tbottomNeighborT = " << bottomNeighborT << std::endl;
+          std::cout << "\ttopNeighborT    = " << topNeighborT << ">" << std::endl;
+          std::cout << "<Velocity values were: " << std::endl;
+          std::cout << "\tleftVelocity    = " << leftVelocity << std::endl;
+          std::cout << "\trightVelocity   = " << rightVelocity << std::endl;
+          std::cout << "\tbottomVelocity  = " << bottomVelocity << std::endl;
+          std::cout << "\ttopVelocity     = " << topVelocity << ">" << std::endl;
+          std::cout << "<Shutting down now!>" << std::endl;
+        }
+        throw "found NaN";
+      }
     }
   }
 
-}
-
-void ProblemStructure::frommVanLeer() {
+  if (DEBUG) {
+    std::cout << "<Full-Time Temperature Data>" << std::endl;
+    std::cout << Eigen::Map<MatrixXd> (temperatureData, M, N) << std::endl << std::endl;
+  }
 }

@@ -60,10 +60,8 @@ void ProblemStructure::updateForcingTerms() {
         parser.queryParamDouble ("referenceTemperature", referenceTemperature, 273.15);
         parser.queryParamDouble ("densityConstant",      densityConstant,      100.0);
         parser.queryParamDouble ("thermalExpansion",     thermalExpansion,       1.0);
-
         parser.pop();
       }
-
       parser.pop();
     }
 
@@ -78,6 +76,7 @@ void ProblemStructure::updateForcingTerms() {
                                      ((temperatureData [i * N + j] + 
                                        temperatureData [(i + 1) * N + j]) / 2 -
                                       referenceTemperature));
+
       }
   } else {
     cerr << "Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now!" << endl;

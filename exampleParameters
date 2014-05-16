@@ -16,9 +16,9 @@ enter problemParams
   # Starting time of the current problem. Used strictly for timekeeping.
   set startTime=0.0
   # Ending time of the current problem.
-  set endTime=0.125
+  #set endTime=2
   # Ending step of the current problem.
-  # set endStep=1
+  set endStep=10
 
   # y-extent of the problem domain. Used for scaling the domain in space.
   set yExtent=1.0
@@ -66,15 +66,15 @@ enter problemParams
   #     Square wave temperature initial conditions. Creates a 2D square wave 
   #     perturbation in a background of temperature referenceTempreature with 
   #     amplitude given by referenceTempreature.
-  set temperatureModel=sineeWave
+  set temperatureModel=sineWave
   # Parameter subsection for the initial temperature model.
   enter initialTemperatureParams
     # Reference or "background" temperature
     set referenceTemperature=273.15
     # Number of modes in the x-direction for use with sineWave initial conditions.
-    set xModes=2
+    set xModes=0
     # Number of modes in the y-direction for use with sineWave initial conditions.
-    set yModes=1
+    set yModes=0
     # Amplitude of the perturbation from reference temperature.
     set temperatureScale=10.0
   leave
