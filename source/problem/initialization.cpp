@@ -80,7 +80,7 @@ void ProblemStructure::initializeTemperature() {
 
   } else if (temperatureModel == "squareWave") {
     for (int i = 0; i < N; ++i)
-      for (int j = 0; j < M; ++j) {
+      for (int j = 0; j < M; ++j) { 
         if ((M / 4 < j && j < 3 * M / 4) && (N / 4 < i && i < 3 * N / 4))
           temperatureData[j * N + i] = referenceTemperature + temperatureScale;
         else

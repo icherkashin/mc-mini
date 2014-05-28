@@ -2,9 +2,9 @@
 # the geometry of the problem (size of the domain, dimensions, etc...)
 enter geometryParams
   # Rows in the problem domain
-  set M=9
+  set M=7
   # Columns in the problem domain
-  set N=9
+  set N=7
 leave
 
 # Problem parameter section. Includes parameters describing the specifics of the
