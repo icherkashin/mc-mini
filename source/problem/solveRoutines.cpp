@@ -76,12 +76,19 @@ void ProblemStructure::updateForcingTerms() {
                                      ((temperatureData [i * N + j] + 
                                        temperatureData [(i + 1) * N + j]) / 2 -
                                       referenceTemperature));
-
       }
   } else {
     cerr << "Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now!" << endl;
     exit(-1);
   }
+
+  #ifdef DEBUG
+  std::cout << "<Calculated forcing model using " << forcingModel << ">" << std::endl;
+  std::cout << "<U Forcing Data>" << std::endl;
+  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (uForcingData, M, N - 1) << std::endl << std::endl;
+  std::cout << "<V Forcing Data>" << std::endl;
+  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (vForcingData, M - 1, N) << std::endl << std::endl;
+  #endif
 }
 
 // Solve the stokes equation
@@ -133,6 +140,16 @@ void ProblemStructure::solveStokes() {
   Map<VectorXd> pressureVector (geometry.getPressureData(), M * N);
   double pressureMean = pressureVector.sum() / (M * N);
   pressureVector -= VectorXd::Constant (M * N, pressureMean);
+
+#ifdef DEBUG
+  std::cout << "<Solved Stokes Equation>" << std::endl;
+  std::cout << "<U Velocity Data>" << std::endl;
+  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getUVelocityData(), M, N - 1) << std::endl << std::endl;
+  std::cout << "<V Velocity Data>" << std::endl;
+  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVVelocityData(), M - 1, N) << std::endl << std::endl;
+  std::cout << "<Pressure Data>" << std::endl;
+  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getPressureData(), M, N) << std::endl << std::endl;
+#endif
 }
 
 // Solve the advection/diffusion equation

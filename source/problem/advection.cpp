@@ -288,7 +288,7 @@ void ProblemStructure::frommMethod() {
   
   if (DEBUG) {
     std::cout << "<Half-Time Temperature Data>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (halfTimeTemperatureData, M, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeTemperatureData, M, N) << std::endl << std::endl;
   }
   
   // Calculate half-time forcing
@@ -323,10 +323,10 @@ void ProblemStructure::frommMethod() {
                                            referenceTemperature));
   if (DEBUG) {
     std::cout << "<Half-Time U Forcing Data>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (halfTimeUForcingData, M, N - 1) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeUForcingData, M, N - 1) << std::endl << std::endl;
 
     std::cout << "<Half-Time V Forcing Data>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (halfTimeVForcingData, M - 1, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeVForcingData, M - 1, N) << std::endl << std::endl;
   }
 
   // Initialize half-time solver
@@ -353,15 +353,15 @@ void ProblemStructure::frommMethod() {
 
     initialized = true;
 
-    if (DEBUG) {
-      std::cout << "<Viscosity Data>" << std::endl;
-      std::cout << Eigen::Map<Eigen::MatrixXd> (viscosityData, M, N) << std::endl << std::endl;
-    }
+    #ifdef DEBUG
+      cout << "<Viscosity Data>" << endl;
+      cout << Map<Matrix <double, Dynamic, Dynamic, RowMajor> > (viscosityData, M, N) << endl << endl;
+    #endif
   }
 
   if (DEBUG) {
-    std::cout << Eigen::Map<Eigen::MatrixXd> (geometry.getVelocityBoundaryData(), M, 2) << std::endl <<std::endl;
-    std::cout << Eigen::Map<Eigen::MatrixXd> (geometry.getVelocityBoundaryData() + 2 * M, 2, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVelocityBoundaryData(), M, 2) << std::endl <<std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVelocityBoundaryData() + 2 * M, 2, N) << std::endl << std::endl;
   }
 
   // Solve stokes at the half-time to find velocities
@@ -383,10 +383,10 @@ void ProblemStructure::frommMethod() {
 
   if (DEBUG) {
     std::cout << "<Half-Time U Velocity>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (halfTimeUVelocity, M, N - 1) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeUVelocity, M, N - 1) << std::endl << std::endl;
 
     std::cout << "<Half-Time V Velocity>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (halfTimeVVelocity, M - 1, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeVVelocity, M - 1, N) << std::endl << std::endl;
   }
 
   // Solve for full-time temperature
@@ -446,6 +446,6 @@ void ProblemStructure::frommMethod() {
 
   if (DEBUG) {
     std::cout << "<Full-Time Temperature Data>" << std::endl;
-    std::cout << Eigen::Map<MatrixXd> (temperatureData, M, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (temperatureData, M, N) << std::endl << std::endl;
   }
 }

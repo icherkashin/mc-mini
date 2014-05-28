@@ -8,6 +8,7 @@
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
+#include "debug.h"
 
 /*
  *
@@ -28,6 +29,9 @@ void ProblemStructure::initializeTimestep() {
   int nTimestep = (endTime - time) / deltaT;
   if (abs (nTimestep * deltaT + time - endTime) > 1E-06) 
     deltaT = (endTime - time) / ++nTimestep;
+  if (DEBUG) {
+    std::cout << "<Timestep initialized to " << deltaT << ">" << std::endl;
+  }
 }
 
 void ProblemStructure::initializeTemperature() {
@@ -82,6 +86,14 @@ void ProblemStructure::initializeTemperature() {
         else
           temperatureData[j * N + i] = referenceTemperature - temperatureScale;
       }
+  } else {
+    std::cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now!>" << endl;
+    exit(-1);
+  }
+
+  if (DEBUG) {
+    std::cout << "<Initialized temperature model as: " << temperatureModel << ">" << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(temperatureData, M, N) << std::endl << std::endl;
   }
 }
 
@@ -134,6 +146,12 @@ void ProblemStructure::initializeVelocityBoundary() {
     cerr << "Unexpected boundary model: \"" << boundaryModel << "\" : Shutting down now!" << endl;
     exit(-1);
   }
+
+  if (DEBUG) {
+    std::cout << "<Initialized boundary model as: " << boundaryModel << ">" << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(uVelocityBoundaryData, M, 2) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(vVelocityBoundaryData, 2, N) << std::endl << std::endl;
+  }
 }
 
 void ProblemStructure::initializeViscosity() {
@@ -169,5 +187,10 @@ void ProblemStructure::initializeViscosity() {
   } else {
     cerr << "Unexpected viscosity model: \"" << viscosityModel << "\" : Shutting down now!" << endl;
     exit(-1);
+  }
+
+  if (DEBUG) {
+    std::cout << "<Viscosity model initialized as: \"" << viscosityModel << "\">" << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (viscosityData, M + 1, N + 1) << std::endl << std::endl;
   }
 }

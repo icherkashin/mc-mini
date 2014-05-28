@@ -8,6 +8,7 @@
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
+#include "debug.h"
 
 using namespace Eigen;
 using namespace std;
@@ -92,6 +93,10 @@ void ProblemStructure::recalculateTimestep() {
   }
 
   if (time + deltaT > endTime) { deltaT = endTime - time; }
+
+  if (DEBUG) {
+    std::cout << "<Recalculated timestep as deltaT = " << deltaT << ">" << std::endl;
+  }
 }
 
 double ProblemStructure::getH() {

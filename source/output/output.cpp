@@ -40,7 +40,10 @@ OutputStructure::OutputStructure (ParamParser&       pp,
   sprintf (s, "test -e %s", outputPath.c_str());
   if (system (s) == 1) {
     sprintf (s, "mkdir %s", outputPath.c_str());
-    system (s);
+    if (system (s) == -1) {
+      std::cout << "<Error: couldn't create directory " << outputPath << ">" << std::endl;
+      exit (-1);
+    }
   }
 
   problemXdmfFile.open ((outputPath + "/" + outputFilename + "-series.xdmf").c_str(), ofstream::out);
