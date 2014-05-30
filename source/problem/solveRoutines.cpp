@@ -7,6 +7,7 @@
 
 #include "matrixForms/sparseForms.h"
 #include "matrixForms/denseForms.h"
+#include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
@@ -83,11 +84,11 @@ void ProblemStructure::updateForcingTerms() {
   }
 
   #ifdef DEBUG
-  std::cout << "<Calculated forcing model using " << forcingModel << ">" << std::endl;
-  std::cout << "<U Forcing Data>" << std::endl;
-  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (uForcingData, M, N - 1) << std::endl << std::endl;
-  std::cout << "<V Forcing Data>" << std::endl;
-  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (vForcingData, M - 1, N) << std::endl << std::endl;
+    cout << "<Calculated forcing model using \"" << forcingModel << "\">" << endl;
+    cout << "<U Forcing Data>" << endl;
+    cout << DataWindow<double> (uForcingData, N - 1, M).displayMatrix() << endl;
+    cout << "<V Forcing Data>" << endl;
+    cout << DataWindow<double> (vForcingData, N, M - 1).displayMatrix() << endl << endl;
   #endif
 }
 
@@ -142,13 +143,13 @@ void ProblemStructure::solveStokes() {
   pressureVector -= VectorXd::Constant (M * N, pressureMean);
 
 #ifdef DEBUG
-  std::cout << "<Solved Stokes Equation>" << std::endl;
-  std::cout << "<U Velocity Data>" << std::endl;
-  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getUVelocityData(), M, N - 1) << std::endl << std::endl;
-  std::cout << "<V Velocity Data>" << std::endl;
-  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVVelocityData(), M - 1, N) << std::endl << std::endl;
-  std::cout << "<Pressure Data>" << std::endl;
-  std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getPressureData(), M, N) << std::endl << std::endl;
+  cout << "<Stokes Equation Solutions>" << endl;
+  cout << "<U Velocity Data>" << endl;
+  cout << DataWindow<double> (geometry.getUVelocityData(), N - 1, M).displayMatrix() << endl;
+  cout << "<V Velocity Data>" << endl;
+  cout << DataWindow<double> (geometry.getVVelocityData(), N, M - 1).displayMatrix() << endl;
+  cout << "<Pressure Data>" << endl;
+  cout << DataWindow<double> (geometry.getPressureData(), N, M).displayMatrix() << endl << endl;
 #endif
 }
 

@@ -72,9 +72,9 @@ enter problemParams
     # Reference or "background" temperature
     set referenceTemperature=0.5
     # Number of modes in the x-direction for use with sineWave initial conditions.
-    set xModes=2
+    set xModes=1
     # Number of modes in the y-direction for use with sineWave initial conditions.
-    set yModes=2
+    set yModes=1
     # Amplitude of the perturbation from reference temperature.
     set temperatureScale=0.5
   leave
@@ -107,7 +107,7 @@ enter problemParams
   enter initialViscosity
     # Viscosity scale for use with the constant viscosity model. Specifies the
     # value of the viscosity across the domain.
-    set viscosityScale=1000.0
+    set viscosityScale=1.0
   leave
 
   # Boundary model for the given problem. Options include:

@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 
 #include "matrixForms/sparseForms.h"
+#include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "debug.h"
@@ -177,25 +178,14 @@ void ProblemStructure::frommMethod() {
       if (riemannFlag == 0b11) {
         halfTimeUOffsetTemperatureData[i * (N - 1) + j] /= 2;
       }
-
-      if (j == 0) {
-        leftNeighborT = temperatureData[i * N + j];
-      } else {
-        leftNeighborT = temperatureData[i * N + (j - 1)];
-      }
-      rightNeighborT = temperatureData[i * N + (j + 1)]; 
-      if (i == 0) {
-        bottomNeighborT = temperatureData[i * N + j];
-      } else {
-        bottomNeighborT = temperatureData[(i - 1) * N + j];
-      }
-      if (i == (M - 1)) {
-        topNeighborT = temperatureData[i * N + j];
-      } else {
-        topNeighborT = temperatureData[(i + 1) * N + j];
-      }
     }
   }
+
+  #ifdef DEBUG
+    cout << "<Half-Time Offset Temperatures>" << endl;
+    cout << "<Half-Time U-Offset Temperature>" << endl;
+    cout << DataWindow<double> (halfTimeUOffsetTemperatureData, N - 1, M).displayMatrix() << endl;
+  #endif
 
   // Loop over V-velocity positions
   for (int i = 0; i < (M - 1); ++i) {
@@ -243,20 +233,14 @@ void ProblemStructure::frommMethod() {
       if (riemannFlag == 0b11) {
         halfTimeVOffsetTemperatureData[i * N + j] /= 2;
       }
-
-      if (j == 0) {
-        leftNeighborT = temperatureData[i * N + j];
-      } else {
-        leftNeighborT = temperatureData[i * N + (j - 1)];
-      }
-      if (j == (N - 1)) {
-        rightNeighborT = temperatureData[i * N + j];
-      } else {
-        rightNeighborT = temperatureData[i * N + (j + 1)];
-      }
     }
   }
-  
+
+  #ifdef DEBUG
+    cout << "<Half-Time V-Offset Temperature>" << endl;
+    cout << DataWindow<double> (halfTimeVOffsetTemperatureData, N, M - 1).displayMatrix() << endl << endl;
+  #endif
+
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
       if (j == 0) {
@@ -286,10 +270,10 @@ void ProblemStructure::frommMethod() {
     }
   }
   
-  if (DEBUG) {
+  #ifdef DEBUG
     std::cout << "<Half-Time Temperature Data>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeTemperatureData, M, N) << std::endl << std::endl;
-  }
+    std::cout << DataWindow<double> (halfTimeTemperatureData, N, M).displayMatrix() << std::endl << std::endl;
+  #endif
   
   // Calculate half-time forcing
   double referenceTemperature;
@@ -321,13 +305,13 @@ void ProblemStructure::frommMethod() {
                                           ((halfTimeTemperatureData [i * N + j] +
                                             halfTimeTemperatureData [(i + 1) * N + j]) / 2 - 
                                            referenceTemperature));
-  if (DEBUG) {
-    std::cout << "<Half-Time U Forcing Data>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeUForcingData, M, N - 1) << std::endl << std::endl;
-
-    std::cout << "<Half-Time V Forcing Data>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeVForcingData, M - 1, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Half-Time Forcing Data>" << endl;
+    cout << "<Half-Time U Forcing Data>" << endl;
+    cout << DataWindow<double> (halfTimeUForcingData, N - 1, M).displayMatrix() << endl;
+    cout << "<Half-Time V Forcing Data>" << endl;
+    cout << DataWindow<double> (halfTimeVForcingData, N, M - 1).displayMatrix() << endl << endl;
+  #endif
 
   // Initialize half-time solver
   static SparseMatrix<double> stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
@@ -355,14 +339,17 @@ void ProblemStructure::frommMethod() {
 
     #ifdef DEBUG
       cout << "<Viscosity Data>" << endl;
-      cout << Map<Matrix <double, Dynamic, Dynamic, RowMajor> > (viscosityData, M, N) << endl << endl;
+      cout << DataWindow<double> (viscosityData, N, M).displayMatrix() << std::endl << std::endl;
     #endif
   }
 
-  if (DEBUG) {
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVelocityBoundaryData(), M, 2) << std::endl <<std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (geometry.getVelocityBoundaryData() + 2 * M, 2, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Velocity Boundary Data>" << endl;
+    cout << "<U Velocity Boundary Data>" << endl;
+    cout << DataWindow<double> (geometry.getVelocityBoundaryData(), 2, M).displayMatrix() << endl;
+    cout << "<V Velocity Boundary Data>" << endl;
+    cout << DataWindow<double> (geometry.getVelocityBoundaryData() + 2 * M, N, 2).displayMatrix() << endl << endl;
+  #endif
 
   // Solve stokes at the half-time to find velocities
   halfTimeStokesSolnVector = solver.solve 
@@ -381,13 +368,13 @@ void ProblemStructure::frommMethod() {
       if (abs (halfTimeVVelocity[i * N + j]) < 10E-10)
         halfTimeVVelocity[i * N + j] = 0;
 
-  if (DEBUG) {
-    std::cout << "<Half-Time U Velocity>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeUVelocity, M, N - 1) << std::endl << std::endl;
-
-    std::cout << "<Half-Time V Velocity>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (halfTimeVVelocity, M - 1, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Half-Time Velocities>" << endl;
+    cout << "<Half-Time U Velocity>" << endl;
+    cout << DataWindow<double> (halfTimeUVelocity, N - 1, M).displayMatrix() << endl;
+    cout << "<Half-Time V Velocity>" << std::endl;
+    cout << DataWindow<double> (halfTimeVVelocity, N, M - 1).displayMatrix() << endl << endl;
+  #endif
 
   // Solve for full-time temperature
   for (int i = 0; i < M; ++i) {
@@ -425,7 +412,7 @@ void ProblemStructure::frommMethod() {
       temperatureData[i * N + j] += deltaT / h * (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT) + deltaT / h * (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT);
 
       if (std::isnan((double)temperatureData[i * N + j])) {
-        if (DEBUG) {
+        #ifdef DEBUG
           std::cout << "<NaN at  = " << i << ", j = " << j << ">" << std::endl;
           std::cout << "<Neighbor values were: " << std::endl;
           std::cout << "\tleftNeighborT   = " << leftNeighborT << std::endl;
@@ -438,14 +425,14 @@ void ProblemStructure::frommMethod() {
           std::cout << "\tbottomVelocity  = " << bottomVelocity << std::endl;
           std::cout << "\ttopVelocity     = " << topVelocity << ">" << std::endl;
           std::cout << "<Shutting down now!>" << std::endl;
-        }
+        #endif
         throw "found NaN";
       }
     }
   }
 
-  if (DEBUG) {
-    std::cout << "<Full-Time Temperature Data>" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (temperatureData, M, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Full-Time Temperature Data>" << endl;
+    cout << DataWindow<double> (temperatureData, N, M).displayMatrix() << endl << endl;
+  #endif
 }

@@ -5,6 +5,7 @@
 #include <Eigen/Sparse>
 
 #include "matrixForms/sparseForms.h"
+#include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
@@ -29,9 +30,9 @@ void ProblemStructure::initializeTimestep() {
   int nTimestep = (endTime - time) / deltaT;
   if (abs (nTimestep * deltaT + time - endTime) > 1E-06) 
     deltaT = (endTime - time) / ++nTimestep;
-  if (DEBUG) {
+  #ifdef DEBUG
     std::cout << "<Timestep initialized to " << deltaT << ">" << std::endl;
-  }
+  #endif
 }
 
 void ProblemStructure::initializeTemperature() {
@@ -91,10 +92,11 @@ void ProblemStructure::initializeTemperature() {
     exit(-1);
   }
 
-  if (DEBUG) {
-    std::cout << "<Initialized temperature model as: " << temperatureModel << ">" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(temperatureData, M, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Initialized temperature model as: \"" << temperatureModel << "\">" << endl;
+    cout << "<Temperature Data>" << endl;
+    cout << DataWindow<double> (temperatureData, N, M).displayMatrix() << endl << endl;
+  #endif
 }
 
 void ProblemStructure::initializeTemperatureBoundary() {
@@ -147,11 +149,13 @@ void ProblemStructure::initializeVelocityBoundary() {
     exit(-1);
   }
 
-  if (DEBUG) {
-    std::cout << "<Initialized boundary model as: " << boundaryModel << ">" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(uVelocityBoundaryData, M, 2) << std::endl << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> >(vVelocityBoundaryData, 2, N) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Initialized boundary model as: \"" << boundaryModel << "\">" << endl;
+    cout << "<U Velocity Boundary Data>" << endl;
+    cout << DataWindow<double> (uVelocityBoundaryData, 2, M).displayMatrix() << endl;
+    cout << "<V Velocity Boundary Data>" << endl;
+    cout << DataWindow<double> (vVelocityBoundaryData, N, 2).displayMatrix() << endl << endl;
+  #endif
 }
 
 void ProblemStructure::initializeViscosity() {
@@ -189,8 +193,9 @@ void ProblemStructure::initializeViscosity() {
     exit(-1);
   }
 
-  if (DEBUG) {
-    std::cout << "<Viscosity model initialized as: \"" << viscosityModel << "\">" << std::endl;
-    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (viscosityData, M + 1, N + 1) << std::endl << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Viscosity model initialized as: \"" << viscosityModel << "\">" << endl;
+    cout << "<Viscosity Data>" << endl;
+    cout << DataWindow<double> (viscosityData, N + 1, M + 1).displayMatrix() << endl << endl;
+  #endif
 }
