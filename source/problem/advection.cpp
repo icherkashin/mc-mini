@@ -134,6 +134,20 @@ void ProblemStructure::frommMethod() {
       cellCenteredUVelocity[i * N + j] = 0.5 * (leftVelocity + rightVelocity);
     }
   }
+
+  for (int i = 0; i < M; i++)
+    for (int j = 0; j < N; j++) {
+      if (abs(cellCenteredUVelocity[i * N + j]) < 1E-10)
+        cellCenteredUVelocity[i * N + j] = 0;
+      if (abs (cellCenteredVVelocity[i * N + j]) < 1E-10)
+        cellCenteredVVelocity[i * N + j] = 0;
+    }
+
+  #ifdef DEBUG
+    std::cout << "<Half-time Cell-Centered Velocities Calculated>" << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (cellCenteredUVelocity, M, N) << std::endl << std::endl;
+    std::cout << Map<Matrix<double, Dynamic, Dynamic, RowMajor> > (cellCenteredVVelocity, M, N) << std::endl << std::endl;
+  #endif
   
   // Calculate temperatures at half-time level
   // Loop over U-velocity positions
@@ -159,9 +173,10 @@ void ProblemStructure::frommMethod() {
         rightNeighborT = temperatureData[i * N + (j + 1)];
 
         halfTimeUOffsetTemperatureData[i * (N - 1) + j] += 
-            temperatureData[i * N + j] + 
+            temperatureData[i * N + j] +
               (h / 2 - deltaT / 2 * cellCenteredUVelocity[i * N + j]) * (rightNeighborT - leftNeighborT) / (2 * h);
       }
+
       if (riemannFlag & 0b10) {
         leftNeighborT = temperatureData[i * N + j];
         if (j == (N - 2)) {
@@ -172,12 +187,22 @@ void ProblemStructure::frommMethod() {
 
         halfTimeUOffsetTemperatureData[i * (N - 1) + j] += 
             temperatureData[i * N + (j + 1)] -
-              (h / 2 - deltaT / 2 * cellCenteredUVelocity[i * N + (j + 1)]) * (rightNeighborT - leftNeighborT) / (2 * h); 
+              (h / 2 + deltaT / 2 * cellCenteredUVelocity[i * N + (j + 1)]) * (rightNeighborT - leftNeighborT) / (2 * h); 
       
       }
       if (riemannFlag == 0b11) {
         halfTimeUOffsetTemperatureData[i * (N - 1) + j] /= 2;
       }
+      
+      #ifdef DEBUG
+        std::cout << "<Solving Riemann problem at " << i << "," << j << ">" << std::endl;
+        std::cout << "\t<Left Neighbor U :" << cellCenteredUVelocity[i * N + j] << ">" << std::endl;
+        std::cout << "\t<Right Neighbor U:" << cellCenteredUVelocity[i * N + (j + 1)] << ">" << std::endl;
+        std::cout << "\t<Left Neighbor T :" << leftNeighborT << ">" << std::endl;
+        std::cout << "\t<Right Neighbor T:" << rightNeighborT << ">" << std::endl;
+        std::cout << "\t<Riemann Flag    :" << riemannFlag << ">" << std::endl;
+        std::cout << "\t<Value Calculated:" << halfTimeUOffsetTemperatureData[i * (N - 1) + j] << ">" << std::endl << std::endl;
+      #endif
     }
   }
 
@@ -192,10 +217,10 @@ void ProblemStructure::frommMethod() {
     for (int j = 0; j < N; ++j) {
       halfTimeVOffsetTemperatureData[i * N + j] = 0;
       // Flag to show which Riemann Problem solution to use
-      int riemannFlag;
+      int riemannFlag = 0;
       if (cellCenteredVVelocity[i * N + j] > 0 && cellCenteredVVelocity[i * (N + 1) + j] > 0) {
         riemannFlag = 0b01;
-      } else if (cellCenteredVVelocity[i * N + j] < 0 && cellCenteredVVelocity[i * (N + 1) + j] > 0) {
+      } else if (cellCenteredVVelocity[i * N + j] < 0 && cellCenteredVVelocity[i * (N + 1) + j] < 0) {
         riemannFlag = 0b10;
       } else {
         riemannFlag = 0b11;
@@ -203,26 +228,26 @@ void ProblemStructure::frommMethod() {
 
       // Calculate T_bottom
       if (riemannFlag & 0b01) {
+        bottomNeighborT = temperatureData[(i + 1) * N + j];
         if (i == 0) {
-          bottomNeighborT = temperatureData[i * N + j];
+          topNeighborT = temperatureData[i * N + j];
         } else {
-          bottomNeighborT = temperatureData[(i - 1) * N + j];
+          topNeighborT = temperatureData[(i - 1) * N + j];
         }
-        topNeighborT = temperatureData[(i + 1) * N + j];
 
         halfTimeVOffsetTemperatureData[i * N + j] +=
             temperatureData[i * N + j] +
-              (h / 2 - deltaT / 2 * cellCenteredVVelocity[i * N + j]) * (topNeighborT - bottomNeighborT) / (2 * h);
+              (h / 2 + deltaT / 2 * cellCenteredVVelocity[i * N + j]) * (topNeighborT - bottomNeighborT) / (2 * h);
       }
       
       // Calculate T_top
       if (riemannFlag & 0b10) {
-        bottomNeighborT = temperatureData[i * N + j];
-        if (i == (N - 1)) {
-          topNeighborT = temperatureData[i * N + j];
+        if (i == (M - 2)) {
+          bottomNeighborT = temperatureData[(i + 1) * N + j];
         } else {
-          topNeighborT = temperatureData[(i + 1) * N + j];
+          bottomNeighborT = temperatureData[(i + 2) * N + j]; 
         }
+        topNeighborT = temperatureData[i * N + j];
 
         halfTimeVOffsetTemperatureData[i * N + j] += 
             temperatureData[(i + 1) * N + j] -
@@ -233,6 +258,16 @@ void ProblemStructure::frommMethod() {
       if (riemannFlag == 0b11) {
         halfTimeVOffsetTemperatureData[i * N + j] /= 2;
       }
+      
+      #ifdef DEBUG
+        std::cout << "<Solving Riemann problem at " << i << "," << j << ">" << std::endl;
+        std::cout << "\t<Bottom Neighbor V:" << cellCenteredVVelocity[i * N + j] << ">" << std::endl;
+        std::cout << "\t<Top Neighbor V   :" << cellCenteredVVelocity[(i + 1) * N + j] << ">" << std::endl;
+        std::cout << "\t<Bottom Neighbor T:" << bottomNeighborT << ">" << std::endl;
+        std::cout << "\t<Top Neighbor T   :" << topNeighborT << ">" << std::endl;
+        std::cout << "\t<Riemann Flag     :" << riemannFlag << ">" << std::endl;
+        std::cout << "\t<Value Calculated :" << halfTimeVOffsetTemperatureData[i * N + j] << ">" << std::endl << std::endl;
+      #endif
     }
   }
 
