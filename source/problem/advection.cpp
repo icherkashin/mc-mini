@@ -148,7 +148,7 @@ void ProblemStructure::frommMethod() {
     cout << "<Cell-Centered U Velocity>" << endl;
     cout << DataWindow<double> (cellCenteredUVelocity, N, M).displayMatrix() << endl;
     cout << "<Cell-Centered V Velocity>" << endl;
-    cout << DataWindow<double> (cellCenteredVVelocity, N, M).displayMatrix() << endl;    
+    cout << DataWindow<double> (cellCenteredVVelocity, N, M).displayMatrix() << endl << endl;    
   #endif
   
   // Calculate temperatures at half-time level

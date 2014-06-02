@@ -14,8 +14,9 @@ namespace DenseForms {
                          const int N,
                          const double h,
                          const double * viscosityData) {
-    if (DEBUG) cerr << "Creating stokesMatrix." << endl;
-
+    #ifdef DEBUG
+      cout << "<Creating " << 3 * M * N - M - N << "x" << 3 * M * N - M - N << " stokesMatrix>" << endl << endl;
+    #endif
     stokesMatrix = MatrixXd::Zero (3 * M * N - M - N, 3 * M * N - M - N);
 
     makeLaplacianXBlock (stokesMatrix.block (0,                 0,                 M * (N - 1), M * (N - 1)), M, N, h, viscosityData);
@@ -31,8 +32,9 @@ namespace DenseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    if (DEBUG) cerr << "Creating LaplacianXBlock." << endl;
-
+    #ifdef DEBUG 
+      cout << "<Creating " << M * (N - 1) << "x" << M * (N - 1) << " LaplacianXBlock>" << endl << endl;
+    #endif
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < (N - 1); ++j) {
         double viscosity = (viscosityData [i * (N + 1) + (j + 1)] +
@@ -63,7 +65,9 @@ namespace DenseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    if (DEBUG) cerr << "Creating LaplacianYBlock." << endl;
+    #ifdef DEBUG
+      cout << "<Creating " << (M - 1) * N << "x" << (M - 1) * N << " LaplacianYBlock>" << endl << endl;
+    #endif
 
     for (int i = 0; i < (M - 1); ++i) {
       for (int j = 0; j < N; ++j) {
@@ -94,7 +98,9 @@ namespace DenseForms {
                        const int M,
                        const int N,
                        const double h) {
-    if (DEBUG) cerr << "Creating GradXBLock." << endl;
+    #ifdef DEBUG
+      cout << "<Creating " << M * (N - 1) << "x" << M * N << " GradXBLock>" << endl << endl;
+    #endif
     
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < (N - 1); ++j) {
