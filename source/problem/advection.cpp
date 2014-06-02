@@ -250,16 +250,6 @@ void ProblemStructure::frommMethod() {
       if (riemannFlag == 0b11) {
         halfTimeVOffsetTemperatureData[i * N + j] /= 2;
       }
-      
-      #ifdef DEBUG
-        std::cout << "<Solving Riemann problem at " << i << "," << j << ">" << std::endl;
-        std::cout << "\t<Bottom Neighbor V:" << cellCenteredVVelocity[i * N + j] << ">" << std::endl;
-        std::cout << "\t<Top Neighbor V   :" << cellCenteredVVelocity[(i + 1) * N + j] << ">" << std::endl;
-        std::cout << "\t<Bottom Neighbor T:" << bottomNeighborT << ">" << std::endl;
-        std::cout << "\t<Top Neighbor T   :" << topNeighborT << ">" << std::endl;
-        std::cout << "\t<Riemann Flag     :" << riemannFlag << ">" << std::endl;
-        std::cout << "\t<Value Calculated :" << halfTimeVOffsetTemperatureData[i * N + j] << ">" << std::endl << std::endl;
-      #endif
     }
   }
 
@@ -298,40 +288,68 @@ void ProblemStructure::frommMethod() {
   }
   
   #ifdef DEBUG
-    std::cout << "<Half-Time Temperature Data>" << std::endl;
-    std::cout << DataWindow<double> (halfTimeTemperatureData, N, M).displayMatrix() << std::endl << std::endl;
+    cout << "<Half-Time Temperature Data>" << endl;
+    cout << DataWindow<double> (halfTimeTemperatureData, N, M).displayMatrix() << endl << endl;
   #endif
   
   // Calculate half-time forcing
-  double referenceTemperature;
-  double densityConstant;
-  double thermalExpansion;
-
-  if (parser.push ("problemParams")) {
-    if (parser.push ("buoyancyModelParams")) {
-      parser.queryParamDouble ("referenceTemperature", referenceTemperature, 273.15);
-      parser.queryParamDouble ("densityConstant",      densityConstant,      100.0);
-      parser.queryParamDouble ("thermalExpansion",     thermalExpansion,       1.0);
-
-      parser.pop();
-    }
-    parser.pop();
-  }
 
   double * halfTimeUForcingData = halfTimeForcingData;
   double * halfTimeVForcingData = halfTimeForcingData + M * (N - 1);
+  
+  if (forcingModel == "tauBenchmark") {
+    // Benchmark taken from Tau (1991; JCP Vol. 99)
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N - 1; ++j)
+        halfTimeUForcingData [i * (N - 1) + j] = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
 
-  for (int i = 0; i < M; ++i)
-    for (int j = 0; j < (N - 1); ++j)
-      halfTimeUForcingData [i * (N - 1) + j] = 0;
+    for (int i = 0; i < M - 1; ++i)
+      for (int j = 0; j < N; ++j)
+        halfTimeVForcingData [i * N + j] = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
-  for (int i = 0; i < (M - 1); ++i)
-    for (int j = 0; j < N; ++j) 
-      halfTimeVForcingData [i * N + j] =-1 * densityConstant *
-                                         (1 - thermalExpansion *
-                                          ((halfTimeTemperatureData [i * N + j] +
-                                            halfTimeTemperatureData [(i + 1) * N + j]) / 2 - 
-                                           referenceTemperature));
+  } else if (forcingModel == "solCXBenchmark" ||
+             forcingModel == "solKZBenchmark") {
+    // solCX Benchmark taken from Kronbichler et al. (2011)
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N - 1; ++j)
+        halfTimeUForcingData [i * (N - 1) + j] = 0;
+
+    for (int i = 0; i < M - 1; ++i)
+      for (int j = 0; j < N; ++j)
+        halfTimeVForcingData [i * N + j] = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
+
+  } else if (forcingModel == "buoyancy") {
+    double referenceTemperature;
+    double densityConstant;
+    double thermalExpansion;
+
+    if (parser.push ("problemParams")) {
+      if (parser.push ("buoyancyModelParams")) {
+        parser.queryParamDouble ("referenceTemperature", referenceTemperature, 273.15);
+        parser.queryParamDouble ("densityConstant",      densityConstant,      100.0);
+        parser.queryParamDouble ("thermalExpansion",     thermalExpansion,       1.0);
+        parser.pop();
+      }
+      parser.pop();
+    }
+
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < (N - 1); ++j)
+        halfTimeUForcingData [i * (N - 1) + j] = 0;
+
+    for (int i = 0; i < (M - 1); ++i)
+      for (int j = 0; j < N; ++j) {
+        halfTimeVForcingData [i * N + j] =  -1 * densityConstant *
+                                             (1 - thermalExpansion * 
+                                              ((halfTimeTemperatureData [i * N + j] + 
+                                               halfTimeTemperatureData [(i + 1) * N + j]) / 2 -
+                                               referenceTemperature));
+      }
+  } else {
+    cerr << "Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now!" << endl;
+    exit(-1);
+  }
+
   #ifdef DEBUG
     cout << "<Half-Time Forcing Data>" << endl;
     cout << "<Half-Time U Forcing Data>" << endl;
