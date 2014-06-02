@@ -32,11 +32,13 @@ void ProblemStructure::updateForcingTerms() {
     // Benchmark taken from Tau (1991; JCP Vol. 99)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
-        uForcingData [i * (N - 1) + j] = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
+//      uForcingData [i * (N - 1) + j] = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
+        uForcingData [i * (N - 1) + j] = 3 * sin ((j + 1) * h) * cos ((i + 0.5) * h);
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingData [i * N + j] = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
+//      vForcingData [i * N + j] = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
+        vForcingData [i * N + j] = -cos ((j + 0.5) * h) * sin ((i + 1) * h);
 
   } else if (forcingModel == "solCXBenchmark" ||
              forcingModel == "solKZBenchmark") {
@@ -157,5 +159,5 @@ void ProblemStructure::solveStokes() {
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
   frommMethod();
-  //backwardEuler();
+  backwardEuler();
 }

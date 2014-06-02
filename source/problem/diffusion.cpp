@@ -8,6 +8,7 @@
 #include "matrixForms/sparseForms.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
+#include "debug.h"
 
 using namespace Eigen;
 using namespace std;
@@ -54,6 +55,7 @@ void ProblemStructure::forwardEuler() {
     tripletList.push_back (Triplet<double> ((M - 1) * N + j, N + j, mu));
   }
 
+
   rhsBoundary.setFromTriplets (tripletList.begin(), tripletList.end());
   rhsBoundary.makeCompressed();
 
@@ -64,14 +66,14 @@ void ProblemStructure::forwardEuler() {
 // Backward Euler Diffusion method. Stable but inefficient.
 void ProblemStructure::backwardEuler() {
   Map<VectorXd> temperatureVector (geometry.getTemperatureData(), M * N);
-  Map<VectorXd> temperatureBoundaryVector (geometry.getTemperatureBoundaryData(), 2 * M);
+  Map<VectorXd> temperatureBoundaryVector (geometry.getTemperatureBoundaryData(), 2 * N);
 
   double mu = deltaT * diffusivity / (h * h);
 
   SparseMatrix<double> lhs;
   SparseMatrix<double> rhsBoundary;
   lhs.resize (M * N, M * N);
-  rhsBoundary.resize (M * N, 2 * M);
+  rhsBoundary.resize (M * N, 2 * N);
 
   vector<Triplet<double> > tripletList;
   tripletList.reserve (5 * M * N);
@@ -108,6 +110,12 @@ void ProblemStructure::backwardEuler() {
 
   VectorXd temporaryVector = temperatureVector;
 
+  #ifdef DEBUG
+    cout << "<Backward Euler " << lhs.rows() << "x" << lhs.cols() << " LHS Matrix generated>" << endl;
+    cout << "<Backward Euler " << rhsBoundary.rows() << "x" << rhsBoundary.cols() << " RHS Boundary Matrix generated>" << endl;
+    cout << "<Temperature Boundary Vector has "<< temperatureBoundaryVector.rows() << " elements>" << endl << endl;
+  #endif
+  
   SimplicialLLT<SparseMatrix<double> > solver;
   solver.compute (lhs);
   temperatureVector =  solver.solve(temporaryVector + rhsBoundary * temperatureBoundaryVector);
@@ -119,10 +127,8 @@ void ProblemStructure::crankNicolson() {
 
   double mu = deltaT * diffusivity / (2 * h * h);
 
-  SparseMatrix<double> rhs;
-  SparseMatrix<double> rhsBoundary;
-  rhs.resize (M * N, M * N);
-  rhsBoundary.resize (M * N, 2 * N);
+  SparseMatrix<double> rhs (M * N, M * N);
+  SparseMatrix<double> rhsBoundary (M * N, 2 * N);
 
   vector<Triplet<double> > tripletList;
   tripletList.reserve (5 * M * N);

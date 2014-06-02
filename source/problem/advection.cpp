@@ -425,14 +425,14 @@ void ProblemStructure::frommMethod() {
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
       if (j == 0) {
-        leftNeighborT = 0; //halfTimeUOffsetTemperatureData[i * (N - 1) + j];
+        leftNeighborT = 0; 
         leftVelocity = 0;
       } else {
         leftNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + (j - 1)]; 
         leftVelocity = halfTimeUVelocity[i * (N - 1) + (j - 1)];
       }
       if (j == (N - 1)) {
-        rightNeighborT = 0; //halfTimeUOffsetTemperatureData[i * (N - 1) + (j - 1)];
+        rightNeighborT = 0;
         rightVelocity = 0;
       } else {
         rightNeighborT = halfTimeUOffsetTemperatureData[i * (N - 1) + j];
@@ -440,7 +440,7 @@ void ProblemStructure::frommMethod() {
       }
 
       if (i == 0) {
-        bottomNeighborT = 0; // halfTimeVOffsetTemperatureData[i * N + j];
+        bottomNeighborT = 0; 
         bottomVelocity = 0;
       } else {
         bottomNeighborT = halfTimeVOffsetTemperatureData[(i - 1) * N + j];
@@ -448,7 +448,7 @@ void ProblemStructure::frommMethod() {
       }
 
       if (i == (M - 1)) {
-        topNeighborT = 0; // halfTimeVOffsetTemperatureData[i * N + j];
+        topNeighborT = 0;
         topVelocity = 0;
       } else {
         topNeighborT = halfTimeVOffsetTemperatureData[i * N + j];
