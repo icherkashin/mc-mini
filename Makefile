@@ -19,9 +19,9 @@ OBJ_DIRS     := $(foreach mdir,$(MODULES),$(addprefix $(OBJ_DIR),$(mdir)/)) $(OB
 OBJECTS      := $(foreach src,$(SOURCES),$(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.o,$(src)))
 
 # C/C++ compiler
-CC           := h5c++
+CC              := h5c++
 # C/C++ compiler flags
-CFLAGS       += -Wall -c -Iinclude -fopenmp -std=c++11 -fopenmp 
+override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11 -fopenmp -DDEBUG
 
 # C/C++ linker
 LD           := h5c++

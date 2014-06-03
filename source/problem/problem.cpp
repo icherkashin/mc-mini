@@ -94,9 +94,9 @@ void ProblemStructure::recalculateTimestep() {
 
   if (time + deltaT > endTime) { deltaT = endTime - time; }
 
-  if (DEBUG) {
-    std::cout << "<Recalculated timestep as deltaT = " << deltaT << ">" << std::endl;
-  }
+  #ifdef DEBUG
+    cout << "<Recalculated timestep as " << deltaT << ">" << endl;
+  #endif
 }
 
 double ProblemStructure::getH() {
