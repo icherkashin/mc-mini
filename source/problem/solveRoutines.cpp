@@ -158,6 +158,7 @@ void ProblemStructure::solveStokes() {
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
+  // upwindMethod();
   frommMethod();
   backwardEuler();
 }
