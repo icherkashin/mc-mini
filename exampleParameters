@@ -34,7 +34,7 @@ enter problemParams
   #     Forcing model taken from Tau (1991; JCP Vol. 99). No additional
   #     parameters required
   #
-  # solCXBenchmark :
+  # solCXBenchmark/solKZBenchmark :
   #     Forcing model taken from Kronbichler et al. (2011). No additional
   #     parameters required
   #
@@ -42,6 +42,10 @@ enter problemParams
   #     Physically-accurate buoyancy forcing model. Additional paramters for
   #     reference temperature, density constant, and thermal expansion constant are
   #     required in the "buoyancyModel" subsection.
+  #
+  # vorticalFlow:
+  #     Forcing model designed to induce a circular vortical flow around the center
+  #     of the domain. No additional parameters required.
   set forcingModel=buoyancy
   # Parameter subsection for the buoyancy model.
   enter buoyancyModelParams
@@ -120,6 +124,50 @@ enter problemParams
   #     Velocity boundary conditions from the benchmark given by Kronbichler et
   #     al., (2011). No additional parameters are required.
   set boundaryModel=noFlux
+
+  # Method for calculating temperature advection. Options include:
+  #
+  # upwindMethod :
+  #     Simple first-order advection method. Fast and stable, but inaccurate.
+  #
+  # frommMethod :
+  #     Second-order accurate advection method. Slower and unstable on
+  #     discontinuous input, but more accurate.
+  #
+  # none :
+  #     No advection.
+  set advectionMethod=frommMethod
+  enter advectionParams
+    # Flux limiter for use with second-order methods. Options include:
+    #
+    # minmod :
+    #    Symmetric (Roe, 1986)
+    #
+    # superbee :
+    #    Symmetric (Roe, 1986)
+    #
+    # vanLeer :
+    #    Symmetric (van Leer, 1974)
+    #
+    # none :
+    #    No flux limiter.
+    set fluxLimiter=superbee
+  leave
+
+  # Method for calculating temperature diffusion. Options include:
+  # 
+  # forwardEuler :
+  #      Simple but unstable first-order diffusion method.
+  #
+  # backwardEuler :
+  #      Simple and stable first-order diffusion method.
+  #
+  # crankNicolson :
+  #      Stable but oscillatory second-order diffusion method.
+  #
+  # none :
+  #      No diffusion.
+  set diffusionMethod=backwardEuler
 leave
 
 # Output parameter section. Used to specify output format and filename.

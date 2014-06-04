@@ -88,7 +88,7 @@ void ProblemStructure::initializeTemperature() {
           temperatureWindow (j, i) = referenceTemperature;
       }
   } else {
-    cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now!>" << endl;
+    cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now>" << endl;
     exit(-1);
   }
 

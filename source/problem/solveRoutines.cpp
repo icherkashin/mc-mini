@@ -168,9 +168,34 @@ void ProblemStructure::solveStokes() {
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
-  upwindMethod();
-  // frommMethod();
-  backwardEuler();
+  #ifdef DEBUG
+    cout << "<Using \"" << advectionMethod << "\" for advection>" << endl;
+  #endif
+  if (advectionMethod == "upwindMethod") {
+    upwindMethod();
+  } else if (advectionMethod == "frommMethod") {
+    frommMethod();
+  } else if (advectionMethod == "none") {
+  } else {
+    cerr << "<Unexpected advection method: \"" << advectionMethod << "\" : Shutting down now>" << endl;
+    exit (-1);
+  }
+  
+  #ifdef DEBUG
+    cout << "<Using \"" << diffusionMethod << "\" for diffusion>" << endl;
+  #endif
+  if (diffusionMethod == "forwardEuler") {
+    forwardEuler();
+  } else if (diffusionMethod == "backwardEuler") {
+    backwardEuler();
+  } else if (diffusionMethod == "crankNicolson") {
+    crankNicolson();
+  } else if (diffusionMethod == "none") {
+  } else {  
+    cerr << "<Unexpected diffusion method: \"" << diffusionMethod << "\" : Shutting down now>" << endl;
+    exit (-1);
+  }
+ 
   #ifdef DEBUG
     cout << "<Finished Advection/Diffusion Step>" << endl << endl;
   #endif

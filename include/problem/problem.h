@@ -29,6 +29,38 @@ class ProblemStructure {
     void frommMethod();
     void frommVanLeer();
 
+    // Flux Limiters
+    double minmod (double ub, double u, double uf) {
+        double r = (u - ub);
+        if ((uf - u) != 0)
+          (r /= (uf - u));
+        else if (r != 0)
+          r = INT_MAX;
+        // Using std::max and std::min from <algorithm> allows us to use more
+        // than two arguments, but requires us to do all kinds of funky stuff
+        // to make types unambiguous.
+        return (double) std::max ({0.0,
+                                   (double) std::min ({1.0, r})});
+    };
+    double superbee (double ub, double u, double uf) {
+        double r = (u - ub);
+        if ((uf - u) != 0) 
+          r /= (uf - u);
+        else if (r != 0)
+          r = INT_MAX;
+        return (double) std::max ({0.0, 
+                                   (double) std::min ({2*r, 1.0}), 
+                                   (double) std::min ({r, 2.0})});
+    }
+    double vanLeer (double ub, double u, double uf) {
+        double r = (u - ub);
+        if ((uf - u) != 0)
+          r /= (uf - u);
+        else if (r != 0)
+          r = INT_MAX;
+        return (r + std::abs (r)) / (1 + std::abs (r));
+    }
+
     // Diffusion methods
     void forwardEuler();
     void backwardEuler();
@@ -55,6 +87,9 @@ class ProblemStructure {
     string temperatureModel;
     string viscosityModel;
     string boundaryModel;
+    string advectionMethod;
+    string fluxLimiter;
+    string diffusionMethod;
     string outputFile;
 
     int M;

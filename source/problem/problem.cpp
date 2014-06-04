@@ -50,6 +50,14 @@ ProblemStructure::ProblemStructure
     parser.queryParamString ("temperatureModel", temperatureModel, "constant");
     parser.queryParamString ("viscosityModel",   viscosityModel,   "constant");
     parser.queryParamString ("boundaryModel",    boundaryModel,    "tauBenchmark");
+    
+    parser.queryParamString ("advectionMethod",  advectionMethod,  "upwindMethod");
+    if (parser.push ("advectionParams")) {
+      parser.queryParamString ("fluxLimiter",      fluxLimiter,      "vanLeer");
+      
+      parser.pop();
+    }
+    parser.queryParamString ("diffusionMethod",  diffusionMethod,  "backwardEuler");
 
     parser.queryParamString ("outputFile",       outputFile,       "output.h5");
 
