@@ -21,7 +21,7 @@ OBJECTS      := $(foreach src,$(SOURCES),$(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.
 # C/C++ compiler
 CC              := h5c++
 # C/C++ compiler flags
-override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11 -fopenmp -DDEBUG
+override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11 -fopenmp
 
 # C/C++ linker
 LD           := h5c++
@@ -62,7 +62,3 @@ style :
 test :
 	@echo $(SRC_DIR) $(SRC_DIRS) $(SOURCES)
 # DO NOT DELETE
-
-source/geometry/geometry.o: include/geometry/geometry.h
-source/geometry/geometry.o: include/parser/parser.h
-source/geometry/geometry.o: include/parser/paramTree.h
