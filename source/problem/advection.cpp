@@ -371,6 +371,15 @@ void ProblemStructure::frommMethod() {
       for (int j = 0; j < N; ++j)
         halfTimeVForcingWindow (j, i) = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
 
+  } else if (forcingModel == "vorticalFlow") {
+    for (int i = 0; i < M; ++i) 
+      for (int j = 0; j < (N - 1); ++j)
+        halfTimeUForcingWindow (j, i) = 3 * cos ((j + 1) * 2 * h) * sin ((i + 0.5) * 2 * h);
+
+    for (int i = 0; i < (M - 1); ++i)
+      for (int j = 0; j < N; ++j)
+        halfTimeVForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
+
   } else if (forcingModel == "buoyancy") {
     double referenceTemperature;
     double densityConstant;

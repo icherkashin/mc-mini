@@ -42,7 +42,7 @@ int main(int argc, char ** argv) {
   
   do {    
     output.writeHDF5File (problem.getTimestepNumber());
-    cerr << "Timestep: " << problem.getTimestepNumber() << "; t = " << problem.getTime() << endl;
+    cout << "<Timestep: " << problem.getTimestepNumber() << "; t=" << problem.getTime() << ">" << endl << endl;
     problem.updateForcingTerms();
     problem.solveStokes();
     problem.recalculateTimestep();

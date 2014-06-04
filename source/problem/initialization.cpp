@@ -88,7 +88,7 @@ void ProblemStructure::initializeTemperature() {
           temperatureWindow (j, i) = referenceTemperature;
       }
   } else {
-    std::cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now!>" << endl;
+    cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now!>" << endl;
     exit(-1);
   }
 
@@ -116,9 +116,9 @@ void ProblemStructure::initializeTemperatureBoundary() {
     parser.pop();
   }
 
-  for (int i = 0; i < N; ++i) {
-    temperatureBoundaryWindow (0, i) = lowerTemperature;
-    temperatureBoundaryWindow (1, i) = upperTemperature;
+  for (int j = 0; j < N; ++j) {
+    temperatureBoundaryWindow (j, 0) = lowerTemperature;
+    temperatureBoundaryWindow (j, 1) = upperTemperature;
   }
 }
 
@@ -144,7 +144,7 @@ void ProblemStructure::initializeVelocityBoundary() {
       for (int j = 0; j < N; ++j)
         vVelocityBoundaryWindow (j, i) = 0;
   } else {
-    cerr << "Unexpected boundary model: \"" << boundaryModel << "\" : Shutting down now!" << endl;
+    cerr << "<Unexpected boundary model: \"" << boundaryModel << "\" : Shutting down now>" << endl;
     exit(-1);
   }
 

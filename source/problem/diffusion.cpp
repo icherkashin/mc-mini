@@ -113,7 +113,7 @@ void ProblemStructure::backwardEuler() {
   #ifdef DEBUG
     cout << "<Backward Euler " << lhs.rows() << "x" << lhs.cols() << " LHS Matrix generated>" << endl;
     cout << "<Backward Euler " << rhsBoundary.rows() << "x" << rhsBoundary.cols() << " RHS Boundary Matrix generated>" << endl;
-    cout << "<Temperature Boundary Vector has "<< temperatureBoundaryVector.rows() << " elements>" << endl << endl;
+    cout << "<Temperature Boundary Vector has "<< temperatureBoundaryVector.rows() << " elements>" << endl;
   #endif
   
   SimplicialLLT<SparseMatrix<double> > solver;

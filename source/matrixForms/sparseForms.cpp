@@ -211,7 +211,7 @@ namespace SparseForms {
                           const int M,
                           const int N) {
     #ifdef DEBUG
-      cout << "<Creating " << 3 * M * N - M - N << "x" << 2 * M * N - M - N << " ForcingMatrix<" << endl;
+      cout << "<Creating " << 3 * M * N - M - N << "x" << 2 * M * N - M - N << " ForcingMatrix>" << endl;
     #endif
     vector<Triplet<double> > tripletList;
 

@@ -28,6 +28,10 @@ void ProblemStructure::updateForcingTerms() {
   DataWindow<double> uForcingWindow (geometry.getUForcingData(), N - 1, M);
   DataWindow<double> vForcingWindow (geometry.getVForcingData(), N, M - 1);
 
+  #ifdef DEBUG
+    cout << "<Calculating forcing model using \"" << forcingModel << "\">" << endl;
+  #endif
+
   if (forcingModel == "tauBenchmark") {
     // Benchmark taken from Tau (1991; JCP Vol. 99)
     for (int i = 0; i < M; ++i)
@@ -48,6 +52,15 @@ void ProblemStructure::updateForcingTerms() {
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
         vForcingWindow (j, i) = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
+
+  } else if (forcingModel == "vorticalFlow") {
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < (N - 1); j++) 
+        uForcingWindow (j, i) = cos ((j + 1) * h) * sin ((i + 0.5) * h);
+
+    for (int i = 0; i < (M - 1); ++i)
+      for (int j = 0; j < N; ++j) 
+        vForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "buoyancy") {
     DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
@@ -79,12 +92,11 @@ void ProblemStructure::updateForcingTerms() {
                                       referenceTemperature));
       }
   } else {
-    cerr << "Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now!" << endl;
+    cerr << "<Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now>" << endl;
     exit(-1);
   }
 
   #ifdef DEBUG
-    cout << "<Calculated forcing model using \"" << forcingModel << "\">" << endl;
     cout << "<U Forcing Data>" << endl;
     cout << uForcingWindow.displayMatrix() << endl;
     cout << "<V Forcing Data>" << endl;
@@ -143,7 +155,7 @@ void ProblemStructure::solveStokes() {
   pressureVector -= VectorXd::Constant (M * N, pressureMean);
 
 #ifdef DEBUG
-  cout << "<Stokes Equation Solutions>" << endl;
+  cout << "<Calculated Stokes Equation Solutions>" << endl;
   cout << "<U Velocity Data>" << endl;
   cout << DataWindow<double> (geometry.getUVelocityData(), N - 1, M).displayMatrix() << endl;
   cout << "<V Velocity Data>" << endl;
@@ -156,6 +168,10 @@ void ProblemStructure::solveStokes() {
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
-  frommMethod();
+  upwindMethod();
+  // frommMethod();
   backwardEuler();
+  #ifdef DEBUG
+    cout << "<Finished Advection/Diffusion Step>" << endl << endl;
+  #endif
 }
