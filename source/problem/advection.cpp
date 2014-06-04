@@ -511,7 +511,7 @@ void ProblemStructure::frommMethod() {
 
       if (std::isnan((double)temperatureWindow (j, i))) {
         #ifdef DEBUG
-          cout << "<NaN at  = " << i << ", j = " << j << ">" << endl;
+          cout << "<NaN at " << i << "," << j << ">" << endl;
           cout << "<Neighbor values were: " << endl;
           cout << "\tleftNeighborT   = " << leftNeighborT << endl;
           cout << "\trightNeighborT  = " << rightNeighborT << endl;

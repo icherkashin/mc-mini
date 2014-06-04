@@ -25,34 +25,32 @@ using namespace std;
 // Update the forcing terms
 // T -> F
 void ProblemStructure::updateForcingTerms() {
-  double * uForcingData = geometry.getUForcingData();
-  double * vForcingData = geometry.getVForcingData();
+  DataWindow<double> uForcingWindow (geometry.getUForcingData(), N - 1, M);
+  DataWindow<double> vForcingWindow (geometry.getVForcingData(), N, M - 1);
 
   if (forcingModel == "tauBenchmark") {
     // Benchmark taken from Tau (1991; JCP Vol. 99)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
-//      uForcingData [i * (N - 1) + j] = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
-        uForcingData [i * (N - 1) + j] = 3 * sin ((j + 1) * h) * cos ((i + 0.5) * h);
+        uForcingWindow (j, i) = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-//      vForcingData [i * N + j] = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
-        vForcingData [i * N + j] = -cos ((j + 0.5) * h) * sin ((i + 1) * h);
+        vForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "solCXBenchmark" ||
              forcingModel == "solKZBenchmark") {
     // solCX Benchmark taken from Kronbichler et al. (2011)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
-        uForcingData [i * (N - 1) + j] = 0;
+        uForcingWindow (j, i) = 0;
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingData [i * N + j] = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
+        vForcingWindow (j, i) = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
 
   } else if (forcingModel == "buoyancy") {
-    double * temperatureData = geometry.getTemperatureData();
+    DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
 
     double referenceTemperature;
     double densityConstant;
@@ -70,14 +68,14 @@ void ProblemStructure::updateForcingTerms() {
 
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < (N - 1); ++j)
-        uForcingData [i * (N - 1) + j] = 0;
+        uForcingWindow (j, i) = 0;
 
     for (int i = 0; i < (M - 1); ++i)
       for (int j = 0; j < N; ++j) {
-        vForcingData [i * N + j] =  -1 * densityConstant *
-                                    (1 - thermalExpansion * 
-                                     ((temperatureData [i * N + j] + 
-                                       temperatureData [(i + 1) * N + j]) / 2 -
+        vForcingWindow (j, i) =  -1 * densityConstant *
+                                  (1 - thermalExpansion * 
+                                   ((temperatureWindow (j, i) + 
+                                     temperatureWindow (j, i + 1)) / 2 -
                                       referenceTemperature));
       }
   } else {
@@ -88,9 +86,9 @@ void ProblemStructure::updateForcingTerms() {
   #ifdef DEBUG
     cout << "<Calculated forcing model using \"" << forcingModel << "\">" << endl;
     cout << "<U Forcing Data>" << endl;
-    cout << DataWindow<double> (uForcingData, N - 1, M).displayMatrix() << endl;
+    cout << uForcingWindow.displayMatrix() << endl;
     cout << "<V Forcing Data>" << endl;
-    cout << DataWindow<double> (vForcingData, N, M - 1).displayMatrix() << endl << endl;
+    cout << vForcingWindow.displayMatrix() << endl << endl;
   #endif
 }
 
@@ -158,7 +156,6 @@ void ProblemStructure::solveStokes() {
 // Solve the advection/diffusion equation
 // U X T -> T
 void ProblemStructure::solveAdvectionDiffusion() {
-  // upwindMethod();
   frommMethod();
   backwardEuler();
 }
