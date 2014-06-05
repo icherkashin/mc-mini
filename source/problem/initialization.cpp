@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
-
+#include <algorithm>
 #include <Eigen/Sparse>
 
 #include "matrixForms/sparseForms.h"
@@ -87,6 +87,27 @@ void ProblemStructure::initializeTemperature() {
         else
           temperatureWindow (j, i) = referenceTemperature;
       }
+  } else if (temperatureModel == "circle") {
+     double center_x;
+     double center_y;
+     double radius;
+     if (parser.push ("problemParams")) {
+       if (parser.tryPush ("initialTemperatureParams")) {
+         parser.getParamDouble ("radius", radius);
+         parser.getParamDouble ("xCenter", center_x);
+         parser.getParamDouble ("yCenter", center_y);
+         parser.pop();
+       }
+       parser.pop();
+     }
+
+     for (int i = 0; i < N; ++i) 
+       for (int j= 0; j < M; ++j) {
+         if ( std::sqrt(std::pow((i*h+h/2)-(center_x),2.0) + std::pow((j*h+h/2)-(center_y),2.0))  < radius )
+           temperatureWindow (j, i) = referenceTemperature + temperatureScale;
+         else
+           temperatureWindow (j, i) = referenceTemperature; 
+       }
   } else {
     cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now>" << endl;
     exit(-1);
