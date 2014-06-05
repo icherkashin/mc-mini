@@ -516,7 +516,24 @@ void ProblemStructure::frommMethod() {
         topNeighborT = halfTimeVOffsetTemperatureWindow (j, i);
         topVelocity = halfTimeVVelocityWindow (j, i);
       }
-      temperatureWindow (j, i) += deltaT / h * (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT) + deltaT / h * (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT);
+ 
+      // Initialize the flux limiter to point to the desired limiter function.
+      static double (ProblemStructure::*limiter) (double,double,double) = NULL;
+      if (limiter == NULL) {
+        if (fluxLimiter == "minmod") {
+          limiter = &ProblemStructure::minmod;
+        } else if (fluxLimiter == "superbee") {
+          limiter = &ProblemStructure::superbee;
+        } else if (fluxLimiter == "vanLeer") {
+          limiter = &ProblemStructure::vanLeer;
+        } else if (fluxLimiter == "none") {
+          limiter = &ProblemStructure::minmod;
+        }
+      }
+
+      if (fluxLimiter != "none") {
+        temperatureWindow (j, i) += deltaT / h * (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT) + deltaT / h * (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT);
+      }
 
       if (std::isnan((double)temperatureWindow (j, i))) {
         #ifdef DEBUG

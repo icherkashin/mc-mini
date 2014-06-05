@@ -21,12 +21,12 @@ OBJECTS      := $(foreach src,$(SOURCES),$(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.
 # C/C++ compiler
 CC              := h5c++
 # C/C++ compiler flags
-override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11 -fopenmp
+override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11
 
 # C/C++ linker
 LD           := h5c++
 # C/C++ linker flags
-LDFLAGS      += -fopenmp 
+LDFLAGS      += -fopenmp -lhdf5
 
 
 vpath %.cpp $(patsubst ' ',':',$(SRC_DIRS))

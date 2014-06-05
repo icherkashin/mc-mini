@@ -41,7 +41,8 @@ class ProblemStructure {
         // to make types unambiguous.
         return (double) std::max ({0.0,
                                    (double) std::min ({1.0, r})});
-    };
+    }
+
     double superbee (double ub, double u, double uf) {
         double r = (u - ub);
         if ((uf - u) != 0) 
@@ -52,6 +53,7 @@ class ProblemStructure {
                                    (double) std::min ({2*r, 1.0}), 
                                    (double) std::min ({r, 2.0})});
     }
+
     double vanLeer (double ub, double u, double uf) {
         double r = (u - ub);
         if ((uf - u) != 0)
