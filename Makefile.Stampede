@@ -21,12 +21,12 @@ OBJECTS      := $(foreach src,$(SOURCES),$(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.
 # C/C++ compiler
 CC              := h5pcc
 # C/C++ compiler flags
-override CFLAGS += -Wall -c -Iinclude -I$TACC_HDF5_INC -I$TACC_BOOST_INC -fopenmp -std=c++0x
+override CFLAGS += -Wall -c -Iinclude -I${TACC_HDF5_INC} -I${TACC_BOOST_INC} -fopenmp -std=c++11
 
 # C/C++ linker
 LD           := h5pcc
 # C/C++ linker flags
-LDFLAGS      += -fopenmp -Wl -rpath,$TACC_HDF5_LIB -rpath,$TACC_HDF5_LIB -L$TACC_HDF5_LIB -L$TACC_BOOST_LIB -lhdf5 -lboost -lz
+LDFLAGS      += -fopenmp -L${TACC_HDF5_LIB} -L${TACC_BOOST_LIB} -lhdf5 -lboost -lz
 
 
 vpath %.cpp $(patsubst ' ',':',$(SRC_DIRS))

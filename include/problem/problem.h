@@ -39,8 +39,7 @@ class ProblemStructure {
         // Using std::max and std::min from <algorithm> allows us to use more
         // than two arguments, but requires us to do all kinds of funky stuff
         // to make types unambiguous.
-        return (double) std::max ({0.0,
-                                   (double) std::min ({1.0, r})});
+        return std::max (0.0, std::min (1.0, r));
     }
 
     double superbee (double ub, double u, double uf) {
@@ -49,9 +48,7 @@ class ProblemStructure {
           r /= (uf - u);
         else if (r != 0)
           r = INT_MAX;
-        return (double) std::max ({0.0, 
-                                   (double) std::min ({2*r, 1.0}), 
-                                   (double) std::min ({r, 2.0})});
+        return std::max (std::max(0.0, std::min (2 * r, 1.0)), std::min (r, 2.0));
     }
 
     double vanLeer (double ub, double u, double uf) {
