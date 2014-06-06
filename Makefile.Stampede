@@ -1,3 +1,6 @@
+# Requires Stampede modules:
+#   phdf5/1.8.9, intel/14.0.1.106, boost/1.51.0, impi/4.1.3.049
+
 EXECUTABLE   := mc-mini
 
 MODULES      = parser matrixForms geometry problem output
@@ -26,7 +29,7 @@ override CFLAGS += -Wall -c -Iinclude -I${TACC_HDF5_INC} -I${TACC_BOOST_INC} -fo
 # C/C++ linker
 LD           := h5pcc
 # C/C++ linker flags
-LDFLAGS      += -fopenmp -L${TACC_HDF5_LIB} -L${TACC_BOOST_LIB} -lhdf5 -lboost -lz
+LDFLAGS      += -fopenmp -L${TACC_HDF5_LIB} -L${TACC_BOOST_LIB} -lhdf5 -lz
 
 
 vpath %.cpp $(patsubst ' ',':',$(SRC_DIRS))

@@ -1,9 +1,9 @@
+#include "hdf5.h"
+
 #include <iostream>
 #include <fstream>
 
 #include "boost/lexical_cast.hpp"
-
-#include "hdf5.h"
 
 #include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
