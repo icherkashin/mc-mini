@@ -40,7 +40,7 @@ OutputStructure::OutputStructure (ParamParser&       pp,
     sprintf (s, "mkdir %s", outputPath.c_str());
     if (system (s) == -1) {
       cout << "<Error: couldn't create directory " << outputPath << ">" << endl;
-      exit (-1);
+      exit (-1);;
     }
   }
 
@@ -65,7 +65,7 @@ void OutputStructure::writeDefaultFile() {
   } else {
     cerr << "Unknown output format " << outputFormat << " specified in parameters." << 
             "Shutting down now." << endl << endl;
-    exit (-1);
+    exit (-1);;
   }
 }
 
@@ -75,7 +75,7 @@ void OutputStructure::writeDefaultFile (const int timestep) {
   } else {
     cerr << "Unknown output format " << outputFormat << " specified in parameters." << 
             "Shutting down now." << endl << endl;
-    exit (-1);
+    exit (-1);;
   }
 }
 
@@ -112,12 +112,22 @@ void OutputStructure::writeHDF5File() {
   datatype = H5Tcopy (H5T_NATIVE_DOUBLE);
   status = H5Tset_order (datatype, H5T_ORDER_LE);
 
+  if (status == -1) {
+    cerr << "<H5Tset_order failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
+
   // Write temperature
   dataset = H5Dcreate (outputFile, "Temperature", datatype, dataspace, 
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getTemperatureData());
+
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   xdmfFile << "      <Attribute Name=\"Temperature\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
            << "        <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -131,6 +141,11 @@ void OutputStructure::writeHDF5File() {
 
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getPressureData());
+
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   xdmfFile << "      <Attribute Name=\"Pressure\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
            << "        <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -161,6 +176,10 @@ void OutputStructure::writeHDF5File() {
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, interpolatedUVelocityData);
  
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
   
   xdmfFile << "      <Attribute Name=\"UVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
            << "        <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -192,6 +211,11 @@ void OutputStructure::writeHDF5File() {
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, interpolatedVVelocityData);
   
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
+
   xdmfFile << "      <Attribute Name=\"VVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
            << "        <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
            << "          " << outputFilename + ".h5:/VVelocity" << endl
@@ -250,6 +274,11 @@ void OutputStructure::writeHDF5File() {
   
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getViscosityData());
+
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
    
   xdmfFile << "      <Attribute Name=\"Viscosity\" AttributeType=\"Scalar\" Center=\"Node\">" << endl
            << "        <DataItem Dimensions=\"" << M + 1 << " " << N + 1 << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -295,12 +324,22 @@ void OutputStructure::writeHDF5File (const int timestep) {
   datatype = H5Tcopy (H5T_NATIVE_DOUBLE);
   status = H5Tset_order (datatype, H5T_ORDER_LE);
 
+  if (status == -1) {
+    cerr << "<H5Tset_order failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
+
   // Write temperature
   dataset = H5Dcreate (outputFile, "Temperature", datatype, dataspace,
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getTemperatureData());
+ 
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   problemXdmfFile << "        <Attribute Name=\"Temperature\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -313,6 +352,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
                        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getPressureData());  
+
+  if (status == -1) {
+    cerr << "<H5Dwrite failed::" << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   problemXdmfFile << "        <Attribute Name=\"Pressure\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -345,6 +389,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, interpolatedUVelocityData);
 
+  if (status == -1) {
+    cerr << "<H5Dwrite failed:: " << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
+
   problemXdmfFile << "        <Attribute Name=\"UVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
                   << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/UVelocity" << endl
@@ -376,6 +425,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, interpolatedVVelocityData);
   
+  if (status == -1) {
+    cerr << "<H5Dwrite failed:: " << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
+
   problemXdmfFile << "        <Attribute Name=\"VVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
                   << "            " << outputFilename + "-" + boost::lexical_cast<std::string> (timestep) << ".h5:/VVelocity" << endl
@@ -414,6 +468,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
 
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, velocityDivergenceData);
+  
+  if (status == -1) {
+    cerr << "<H5Dwrite failed:: " << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   problemXdmfFile << "        <Attribute Name=\"Divergence\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
@@ -426,6 +485,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
   dataspace = H5Screate_simple (2, dimsf, NULL);
   datatype = H5Tcopy (H5T_NATIVE_DOUBLE);
   status = H5Tset_order (datatype, H5T_ORDER_LE);
+
+  if (status == -1) {
+    cerr << "<H5Tset_order failed:: " << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
  
   // Write Viscosity
   dataset = H5Dcreate (outputFile, "Viscosity", datatype, dataspace,
@@ -433,6 +497,11 @@ void OutputStructure::writeHDF5File (const int timestep) {
 
   status = H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
                      H5P_DEFAULT, geometry.getViscosityData());
+
+  if (status == -1) {
+    cerr << "<H5Dwrite failed:: " << __FILE__ << ":" << __LINE__ <<">" << endl;
+    exit (-1);
+  }
 
   problemXdmfFile << "        <Attribute Name=\"Viscosity\" AttributeType=\"Scalar\" Center=\"Node\">" << endl
                   << "          <DataItem Dimensions=\"" << M + 1<< " " << N + 1 << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
