@@ -79,15 +79,18 @@ enter problemParams
   enter initialTemperatureParams
     # Reference or "background" temperature
     set referenceTemperature=0.5
-    # Number of modes in the x-direction for use with sineWave initial conditions.
-    set xModes=2
-    # Number of modes in the y-direction for use with sineWave initial conditions.
-    set yModes=2
+    # Number of modes in the x-direction (for use with sineWave initial conditions.)
+    #set xModes=2
+    # Number of modes in the y-direction (for use with sineWave initial conditions.)
+    # set yModes=2
     # Amplitude of the perturbation from reference temperature.
     set temperatureScale=0.5
+    # Radius (for circle initial conditions.)
     set radius=0.25
-    set xCenter=0.3
-    set yCenter=0.5
+    # X-Position of the center of the circular inclusion (for circle initial conditions.)
+    set xCenter=0.5
+    # Y-position of the center of the circular inclusion (for circle initial conditions.)
+    set yCenter=0.3
   leave
 
   # Temperature boundary parameters for the given problem

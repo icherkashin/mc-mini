@@ -103,7 +103,7 @@ void ProblemStructure::initializeTemperature() {
 
      for (int i = 0; i < N; ++i) 
        for (int j= 0; j < M; ++j) {
-         if ( std::sqrt(std::pow((i*h+h/2)-(center_x),2.0) + std::pow((j*h+h/2)-(center_y),2.0))  < radius )
+         if ( std::sqrt(std::pow((i*h+h/2)-(center_y),2.0) + std::pow((j*h+h/2)-(center_x),2.0))  < radius )
            temperatureWindow (j, i) = referenceTemperature + temperatureScale;
          else
            temperatureWindow (j, i) = referenceTemperature; 
