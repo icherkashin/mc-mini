@@ -2,9 +2,9 @@
 # the geometry of the problem (size of the domain, dimensions, etc...)
 enter geometryParams
   # Rows in the problem domain
-  set M=9
+  set M=55
   # Columns in the problem domain
-  set N=9
+  set N=55
 leave
 
 # Problem parameter section. Includes parameters describing the specifics of the
@@ -78,13 +78,13 @@ enter problemParams
   # Parameter subsection for the initial temperature model.
   enter initialTemperatureParams
     # Reference or "background" temperature
-    set referenceTemperature=0.5
+    set referenceTemperature=0.0
+    # Amplitude of the perturbation from reference temperature.
+    set temperatureScale=1.0
     # Number of modes in the x-direction (for use with sineWave initial conditions.)
     #set xModes=2
     # Number of modes in the y-direction (for use with sineWave initial conditions.)
     # set yModes=2
-    # Amplitude of the perturbation from reference temperature.
-    set temperatureScale=0.5
     # Radius (for circle initial conditions.)
     set radius=0.25
     # X-Position of the center of the circular inclusion (for circle initial conditions.)
@@ -161,7 +161,7 @@ enter problemParams
     #
     # none :
     #    No flux limiter.
-    set fluxLimiter=superbee
+    set fluxLimiter=minmod
   leave
 
   # Method for calculating temperature diffusion. Options include:
