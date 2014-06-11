@@ -2,13 +2,30 @@
 
 #include "parser/parser.h"
 
+/*! ProblemStructure holds all of the specific details and routines for the
+ *  current problem which would be out-of-place in the GeometryStructure.
+ *  These details include the current time, the x and y-extents of the problem
+ *  domain, and certain physical constants such as diffusivity and viscosity.
+ */
+
 class ProblemStructure {
   public:
+    /** ProblemStructure constructor.
+     *  Construct the ProblemStructure object with a reference to the 
+     *  ParamParser and GeometryStructure objects.
+     */
     ProblemStructure (ParamParser& pp, GeometryStructure& gs);
     ~ProblemStructure();
 
-    // Initialize problem (set dt, temperature, boundary.)
+    /** Initialize the problem. 
+     *  This includes initializing the timestep, setting the initial viscosity,
+     *  impose the initial temperature condition and temperature and velocity
+     *  boundary conditions.
+     */
     void initializeProblem();
+    /** Initialize the timestep based on the 
+     *
+     */
     void initializeTimestep();
     void initializeViscosity();
     void initializeTemperature();
@@ -32,32 +49,43 @@ class ProblemStructure {
     // Flux Limiters
     double minmod (double ub, double u, double uf) {
         double r = (u - ub);
+        
         if ((uf - u) != 0)
-          (r /= (uf - u));
-        else if (r != 0)
-          r = INT_MAX;
-        // Using std::max and std::min from <algorithm> allows us to use more
-        // than two arguments, but requires us to do all kinds of funky stuff
-        // to make types unambiguous.
-        return std::max (0.0, std::min (1.0, r));
+          r /= (uf - u);
+        else 
+          if (r <= 0)
+            r = 0;
+          else
+            r = UINT_MAX;
+        
+        return max (0.0, min (1.0, r));
     }
 
     double superbee (double ub, double u, double uf) {
         double r = (u - ub);
+
         if ((uf - u) != 0) 
           r /= (uf - u);
-        else if (r != 0)
-          r = INT_MAX;
-        return std::max (std::max(0.0, std::min (2 * r, 1.0)), std::min (r, 2.0));
+        else
+          if (r <= 0)
+            r = 0;
+          else
+            r = UINT_MAX;
+
+        return max (max (0.0, min (2 * r, 1.0)), min (r, 2.0)) / 2; 
     }
 
     double vanLeer (double ub, double u, double uf) {
         double r = (u - ub);
         if ((uf - u) != 0)
           r /= (uf - u);
-        else if (r != 0)
-          r = INT_MAX;
-        return (r + std::abs (r)) / (1 + std::abs (r));
+        else
+          if (r <= 0)
+            r = 0;
+          else
+            r = UINT_MAX;
+
+        return (r + abs (r)) / (1 + abs (r)) / 2;
     }
 
     // Diffusion methods

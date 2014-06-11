@@ -240,6 +240,7 @@ void ProblemStructure::frommMethod() {
       // Velocities are in opposing directions. Take the average of the fluxes
       // from the left and right neighboring cells
       if (riemannFlag == 0b11) halfTimeUOffsetTemperatureWindow (j, i) /= 2;
+
     }
   }
 
@@ -316,32 +317,51 @@ void ProblemStructure::frommMethod() {
     cout << halfTimeVOffsetTemperatureWindow.displayMatrix() << endl << endl;
   #endif
 
+  double leftHalfTimeNeighborT, rightHalfTimeNeighborT, 
+         bottomHalfTimeNeighborT, topHalfTimeNeighborT; 
+
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
+      double diffusionWeight = 4;
       if (j == 0) {
-        leftNeighborT = temperatureWindow (j, i); 
+        leftHalfTimeNeighborT = temperatureWindow (j, i);
+        leftNeighborT         = temperatureWindow (j, i);
+        diffusionWeight = 3;
       } else {
-        leftNeighborT = halfTimeUOffsetTemperatureWindow (j - 1, i); 
+        leftHalfTimeNeighborT = halfTimeUOffsetTemperatureWindow (j - 1, i); 
+        leftNeighborT         = temperatureWindow (j - 1, i);
       }
       if (j == (N - 1)) {
-        rightNeighborT = temperatureWindow (j, i); 
+        rightHalfTimeNeighborT = temperatureWindow (j, i); 
+        rightNeighborT         = temperatureWindow (j, i);
+        diffusionWeight = 3;
       } else {
-        rightNeighborT = halfTimeUOffsetTemperatureWindow (j, i);
+        rightHalfTimeNeighborT = halfTimeUOffsetTemperatureWindow (j, i);
+        rightNeighborT         = temperatureWindow (j + 1, i);
       }
 
       if (i == 0) {
-        bottomNeighborT = temperatureBoundaryWindow (j, 0);
+        bottomHalfTimeNeighborT = temperatureBoundaryWindow (j, 0);
+        bottomNeighborT         = temperatureBoundaryWindow (j, 0);
       } else {
-        bottomNeighborT = halfTimeVOffsetTemperatureWindow (j, i - 1);
+        bottomHalfTimeNeighborT = halfTimeVOffsetTemperatureWindow (j, i - 1);
+        bottomNeighborT         = temperatureWindow (j, i - 1);
       }
 
       if (i == (M - 1)) {
-        topNeighborT = temperatureBoundaryWindow (j, 1);
+        topHalfTimeNeighborT = temperatureBoundaryWindow (j, 1);
+        topNeighborT         = temperatureBoundaryWindow (j, 1);
       } else {
-        topNeighborT = halfTimeVOffsetTemperatureWindow (j, i);
+        topHalfTimeNeighborT = halfTimeVOffsetTemperatureWindow (j, i);
+        topNeighborT         = temperatureWindow (j, i + 1);
       }
 
-      halfTimeTemperatureWindow (j, i) = (rightNeighborT + leftNeighborT + topNeighborT + bottomNeighborT) / 4;
+      halfTimeTemperatureWindow (j, i) = 
+        (rightHalfTimeNeighborT + leftHalfTimeNeighborT + 
+         topHalfTimeNeighborT + bottomHalfTimeNeighborT) / 4 - 
+         (diffusionWeight * temperatureWindow (j, i) + 
+           leftNeighborT + rightNeighborT + bottomNeighborT + topNeighborT) 
+         * deltaT * diffusivity / (h * h);
     }
   }
   
@@ -533,7 +553,8 @@ void ProblemStructure::frommMethod() {
       }
 
       double leftFirstOrderT = 0, rightFirstOrderT = 0, 
-             bottomFirstOrderT = 0, topFirstOrderT = 0;
+             bottomFirstOrderT = 0, topFirstOrderT = 0,
+             secondLeftFirstOrderT = 0, secondBottomFirstOrderT = 0;
       double leftFirstOrderVelocity, rightFirstOrderVelocity,
              bottomFirstOrderVelocity, topFirstOrderVelocity;
       double lateralFlux = 0, transverseFlux = 0;
@@ -556,7 +577,7 @@ void ProblemStructure::frommMethod() {
         double topFlux = 0, bottomFlux = 0;
 
         if (j > 0) {
-          if (leftVelocity < 0) {
+          if (leftFirstOrderVelocity < 0) {
             leftFlux = temporaryTemperature (i * N + j) * leftFirstOrderVelocity * deltaT / h;
             leftFirstOrderT = temporaryTemperature (i * N + j);
           } else {
@@ -565,8 +586,15 @@ void ProblemStructure::frommMethod() {
           }
         }
 
+        if (j > 1) {
+          secondLeftFirstOrderT = temporaryTemperature (i * N + (j - 2));
+        } else {
+          // Handle the weird symmetric boundary condition using abs magic
+          secondLeftFirstOrderT = temporaryTemperature (i * N + abs (1 - j));
+        }
+
         if (j < (N - 1)) {
-          if (rightVelocity > 0) {
+          if (rightFirstOrderVelocity > 0) {
             rightFlux = temporaryTemperature (i * N + j) * rightFirstOrderVelocity * deltaT / h;
             rightFirstOrderT = temporaryTemperature (i * N + j);
           } else {
@@ -576,7 +604,7 @@ void ProblemStructure::frommMethod() {
         }
 
         if (i > 0) {
-          if (bottomVelocity < 0) {
+          if (bottomFirstOrderVelocity < 0) {
             bottomFlux = temporaryTemperature (i * N + j) * bottomFirstOrderVelocity * deltaT / h;
             bottomFirstOrderT = temporaryTemperature (i * N + j);
           } else {
@@ -585,8 +613,14 @@ void ProblemStructure::frommMethod() {
           }
         }
 
+        if (i > 1) {
+          secondBottomFirstOrderT = temporaryTemperature ((i - 2) * N + j);
+        } else {
+          secondBottomFirstOrderT = temperatureBoundaryWindow (0, j);
+        }
+
         if (i < (M - 1)) {
-          if (topVelocity > 0) {
+          if (topFirstOrderVelocity > 0) {
             topFlux = temporaryTemperature (i * N + j) * topFirstOrderVelocity * deltaT / h;
             topFirstOrderT = temporaryTemperature (i * N + j);
           } else {
@@ -595,26 +629,29 @@ void ProblemStructure::frommMethod() {
           }
         }
 
-        double lateralPhi = (this->*limiter) (leftFirstOrderT, 
-                                         temporaryTemperature (i * N + j), 
-                                         rightFirstOrderT);
-        double transversePhi = (this->*limiter) (bottomFirstOrderT, 
+        double leftPhi = (this->*limiter) (secondLeftFirstOrderT,
+                                           leftFirstOrderT,
+                                           temporaryTemperature (i * N + j));
+        double rightPhi = (this->*limiter) (leftFirstOrderT, 
                                             temporaryTemperature (i * N + j), 
-                                            topFirstOrderT);
+                                            rightFirstOrderT);
+        double bottomPhi = (this->*limiter) (secondBottomFirstOrderT,
+                                             bottomFirstOrderT,
+                                             temporaryTemperature (i * N + j));
+        double topPhi = (this->*limiter) (bottomFirstOrderT, 
+                                          temporaryTemperature (i * N + j), 
+                                          topFirstOrderT);
  
-        lateralFlux = ((3 - lateralPhi) * (leftFlux - rightFlux) + 
-                        lateralPhi * (deltaT / h * 
-                          (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT))) 
-                      / 3;
-        transverseFlux = ((3 - transversePhi) * (bottomFlux - topFlux) + 
-                           transversePhi * (deltaT / h * 
-                             (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT))) 
-                         / 3;
+        lateralFlux = 
+            ((1 - leftPhi) * leftFlux + leftPhi * (leftVelocity * leftNeighborT * deltaT / h)) - 
+            ((1 - rightPhi) * rightFlux + rightPhi * rightVelocity * rightNeighborT * deltaT / h);
+        transverseFlux = ((1 - bottomPhi) * bottomFlux + bottomPhi * bottomVelocity * bottomNeighborT * deltaT / h) -
+                         ((1 - topPhi) * topFlux + topPhi * topVelocity * topNeighborT * deltaT / h);
 
         temperatureWindow (j, i) = temporaryTemperature (i * N + j) + transverseFlux + lateralFlux;
-      } else {
+      } else 
         temperatureWindow (j, i) = temporaryTemperature (i * N + j) + deltaT / h * (leftVelocity * leftNeighborT - rightVelocity * rightNeighborT) + deltaT / h * (bottomVelocity * bottomNeighborT - topVelocity * topNeighborT);
-      }
+
       if (std::isnan((double)temperatureWindow (j, i))) {
         #ifdef DEBUG
           cout << "<NaN at " << i << "," << j << ">" << endl;
