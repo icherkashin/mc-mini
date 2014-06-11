@@ -15,7 +15,6 @@ class ProblemStructure {
      *  ParamParser and GeometryStructure objects.
      */
     ProblemStructure (ParamParser& pp, GeometryStructure& gs);
-    ~ProblemStructure();
 
     /** Initialize the problem. 
      *  This includes initializing the timestep, setting the initial viscosity,

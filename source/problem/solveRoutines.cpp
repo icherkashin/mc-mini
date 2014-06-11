@@ -5,8 +5,11 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
+#ifndef USE_DENSE
 #include "matrixForms/sparseForms.h"
+#else
 #include "matrixForms/denseForms.h"
+#endif
 #include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
@@ -115,6 +118,7 @@ void ProblemStructure::solveStokes() {
   static SparseMatrix<double> boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
   static SparseLU<SparseMatrix<double>, COLAMDOrdering<int> > solver;
   #else
+  /* Don't use this unless you hate your computer. */
   static MatrixXd stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
   static MatrixXd forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
   static MatrixXd boundaryMatrix (3 * M * N - M - N, 2 * M + 2 * N);
