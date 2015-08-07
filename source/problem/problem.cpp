@@ -146,6 +146,7 @@ void ProblemStructure::recalculateTimestep() {
    *  diffusive delta-t is calculated using the formula
    *  \f[ \Delta{t} = \frac {\sigma h} {\kappa} \f]
    *  where \f$\Delta{t}\f$
+   **/ 
   double diffusionDeltaT = cfl * h / diffusivity;
 
   if (advectionDeltaT < diffusionDeltaT) {
