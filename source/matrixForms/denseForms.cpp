@@ -226,7 +226,7 @@ namespace DenseForms {
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < 2; ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityWindow (j, i * M) + viscosityWindow (j - 1, i * M)) / 2;
+        double viscosity = (viscosityWindow (j, i * M) + viscosityWindow (j + 1, i * M)) / 2;
         laplacianBC (i * (M - 2) * N + j, i * N + j) = viscosity / (h * h);
       }
     }

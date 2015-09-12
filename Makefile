@@ -21,7 +21,7 @@ OBJECTS      := $(foreach src,$(SOURCES),$(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.
 # C/C++ compiler
 CC              := h5c++
 # C/C++ compiler flags
-override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11
+override CFLAGS += -Wall -c -Iinclude -fopenmp -std=c++11 -O2 -g -Warray-bounds
 
 # C/C++ linker
 LD           := h5c++
