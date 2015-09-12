@@ -1,0 +1,73 @@
+enter geometryParams
+  set M=33
+  set N=65
+leave
+
+enter problemParams
+  set cfl=0.5
+
+  set startTime=0.0
+# set endTime=1.0
+  set endStep=1
+
+  set yExtent=3.1415926
+
+  set diffusivity=1.0
+  set buoyancy=1.0
+
+  set forcingModel=tauBenchmark
+
+  set temperatureModel=constant
+  enter initialTemperatureParams
+    set referenceTemperature=0.0
+    set temperatureScale=1.0
+  leave
+
+  enter temperatureBoundaryParams
+    set upperBoundaryTemperature=0.0
+    set lowerBoundaryTemperature=0.0
+  leave
+
+  set viscosityModel=constant
+  enter initialViscosity
+    set viscosityScale=1.0
+  leave
+
+  set boundaryModel=tauBenchmark
+
+ # Method for calculating temperature advection. Options include:
+  #
+  # upwindMethod :
+  #     Simple first-order advection method. Fast and stable, but inaccurate.
+  #
+  # frommMethod :
+  #     Second-order accurate advection method. Slower and unstable on
+  #     discontinuous input, but more accurate.
+  #
+  # none :
+  #     No advection.
+  set advectionMethod=upwindMethod
+  enter advectionParams
+    # Flux limiter for use with second-order methods. Options include:
+    #
+    # minmod :
+    #    Symmetric (Roe, 1986)
+    #
+    # superbee :
+    #    Symmetric (Roe, 1986)
+    #
+    # vanLeer :
+    #    Symmetric (van Leer, 1974)
+    #
+    # none :
+    #    No flux limiter.
+    set fluxLimiter=none
+  leave
+
+leave
+
+enter outputParams
+  set outputFormat=hdf5
+  set outputPath=output/tauBenchmark
+  set outputFilename=tauBenchmark1
+leave

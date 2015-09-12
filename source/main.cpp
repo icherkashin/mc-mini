@@ -2,6 +2,11 @@
 #include <iomanip>
 #include <cassert>
 
+// First step in porting mc-mini from Eigen2 to Eigen3.
+// http://eigen.tuxfamily.org/dox/Eigen2ToEigen3.html
+
+#define EIGEN2_SUPPORT_STAGE10_FULL_EIGEN2_API true
+
 #include <Eigen/OrderingMethods>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseQR>
