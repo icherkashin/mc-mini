@@ -5,6 +5,8 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
+#include "debug.h"
+
 #ifndef USE_DENSE
 #include "matrixForms/sparseForms.h"
 #else
@@ -14,7 +16,6 @@
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
-#include "debug.h"
 
 using namespace Eigen;
 using namespace std;
