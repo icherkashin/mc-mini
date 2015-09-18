@@ -53,8 +53,8 @@ void ProblemStructure::initializeTemperature() {
   
   if (temperatureModel == "constant") {
     
-    for (int i = 0; i < N; ++i) 
-      for (int j = 0; j < M; ++j) 
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N; ++j)
         temperatureWindow (j, i) = referenceTemperature;
    
   } else if (temperatureModel == "sineWave") {
@@ -72,16 +72,16 @@ void ProblemStructure::initializeTemperature() {
       parser.pop();
     }
 
-    for (int i = 0; i < N; ++i)
-      for (int j = 0; j < M; ++j)
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N; ++j)
         temperatureWindow (j, i) = referenceTemperature +
                                    sin ((i + 0.5) * h * xModes * M_PI / xExtent) * 
                                    sin ((j + 0.5) * h * yModes * M_PI / yExtent) * 
                                    temperatureScale;
 
   } else if (temperatureModel == "squareWave") {
-    for (int i = 0; i < N; ++i)
-      for (int j = 0; j < M; ++j) { 
+    for (int i = 0; i < M; ++i)
+      for (int j = 0; j < N; ++j) {
         if ((M / 4 < j && j < 3 * M / 4) && (N / 4 < i && i < 3 * N / 4))
           temperatureWindow (j, i) = referenceTemperature + temperatureScale;
         else
@@ -101,8 +101,8 @@ void ProblemStructure::initializeTemperature() {
        parser.pop();
      }
 
-     for (int i = 0; i < N; ++i) 
-       for (int j= 0; j < M; ++j) {
+     for (int i = 0; i < M; ++i)
+       for (int j= 0; j < N; ++j) {
          if ( std::sqrt(std::pow((i*h+h/2)-(center_y),2.0) + std::pow((j*h+h/2)-(center_x),2.0))  < radius )
            temperatureWindow (j, i) = referenceTemperature + temperatureScale;
          else
