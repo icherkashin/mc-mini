@@ -147,6 +147,7 @@ void ProblemStructure::recalculateTimestep() {
    *  \f[ \Delta{t} = \frac {\sigma h} {\kappa} \f]
    *  where \f$\Delta{t}\f$
    **/
+
   double diffusionDeltaT = cfl * h / diffusivity;
 
   if (advectionDeltaT < diffusionDeltaT) {
