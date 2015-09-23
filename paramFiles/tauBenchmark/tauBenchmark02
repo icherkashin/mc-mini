@@ -188,5 +188,5 @@ enter outputParams
   # Output path. Specifies the path for the output file.
   set outputPath=output/tauBenchmark
   # Output filename. Specifies the filename for the output file.
-  set outputFilename=tauBenchmark2
+  set outputFilename=tauBenchmark02
 leave
