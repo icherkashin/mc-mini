@@ -171,3 +171,45 @@
           </DataItem>
         </Attribute>
       </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Time Value="0.00129161"/>
+        <Topology TopologyType="2DCoRectMesh" NumberOfElements="257 257"/>
+        <Geometry GeometryType="Origin_DxDy">
+          <DataItem Dimensions="2">
+            0 0
+          </DataItem>
+          <DataItem Dimensions="2">
+            0.00390625 0.00390625
+          </DataItem>
+        </Geometry>
+        <Attribute Name="Temperature" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="256 256" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/Temperature
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Pressure" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="256 256" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/Pressure
+          </DataItem>
+        </Attribute>
+        <Attribute Name="UVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="256 256" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/UVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="VVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="256 256" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/VVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Divergence" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="256 256" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/Divergence
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Viscosity" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="257 257" NumberType="Float" Precision="8" Format="HDF">
+            exampleOutput-4.h5:/Viscosity
+          </DataItem>
+        </Attribute>
+      </Grid>

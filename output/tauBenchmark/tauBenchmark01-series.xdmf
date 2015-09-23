@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="2.0">
+  <Domain>
+    <Grid Name="CellTime" GridType="Collection" CollectionType="Temporal">
+      <Grid Name="mesh" GridType="Uniform">
+        <Time Value="0"/>
+        <Topology TopologyType="2DCoRectMesh" NumberOfElements="5 9"/>
+        <Geometry GeometryType="Origin_DxDy">
+          <DataItem Dimensions="2">
+            0 0
+          </DataItem>
+          <DataItem Dimensions="2">
+            0.785398 0.785398
+          </DataItem>
+        </Geometry>
+        <Attribute Name="Temperature" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/Temperature
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Pressure" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/Pressure
+          </DataItem>
+        </Attribute>
+        <Attribute Name="UVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/UVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="VVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/VVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Divergence" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/Divergence
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Viscosity" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="5 9" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-0.h5:/Viscosity
+          </DataItem>
+        </Attribute>
+      </Grid>
+      <Grid Name="mesh" GridType="Uniform">
+        <Time Value="0.300559"/>
+        <Topology TopologyType="2DCoRectMesh" NumberOfElements="5 9"/>
+        <Geometry GeometryType="Origin_DxDy">
+          <DataItem Dimensions="2">
+            0 0
+          </DataItem>
+          <DataItem Dimensions="2">
+            0.785398 0.785398
+          </DataItem>
+        </Geometry>
+        <Attribute Name="Temperature" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/Temperature
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Pressure" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/Pressure
+          </DataItem>
+        </Attribute>
+        <Attribute Name="UVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/UVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="VVelocity" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/VVelocity
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Divergence" AttributeType="Scalar" Center="Cell">
+          <DataItem Dimensions="4 8" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/Divergence
+          </DataItem>
+        </Attribute>
+        <Attribute Name="Viscosity" AttributeType="Scalar" Center="Node">
+          <DataItem Dimensions="5 9" NumberType="Float" Precision="8" Format="HDF">
+            tauBenchmark01-1.h5:/Viscosity
+          </DataItem>
+        </Attribute>
+      </Grid>
+    </Grid>
+  </Domain>
+</Xdmf>
