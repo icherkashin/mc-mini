@@ -616,7 +616,7 @@ void ProblemStructure::frommMethod() {
         if (i > 1) {
           secondBottomFirstOrderT = temporaryTemperature ((i - 2) * N + j);
         } else {
-          secondBottomFirstOrderT = temperatureBoundaryWindow (0, j);
+          secondBottomFirstOrderT = temperatureBoundaryWindow (j, 0);
         }
 
         if (i < (M - 1)) {
