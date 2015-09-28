@@ -110,7 +110,7 @@ bool ProblemStructure::advanceTimestep() {
   return ((time < endTime) && (timestepNumber < endStep));
 }
 
-/** recalculateTimestep() calculates the current timestep based on the user-
+/** recalculateTimestep() calculates the current time step based on the user-
  *  specified CFL condition and the current state of the simulation. The
  *  timestep is calculated based on the maximum rates of advection and
  *  diffusion in the current problem. In future, this should take into account
@@ -123,18 +123,28 @@ void ProblemStructure::recalculateTimestep() {
   Map<VectorXd> uVelocityBoundaryVector (geometry.getUVelocityBoundaryData(), 2 * N);
   Map<VectorXd> vVelocityBoundaryVector (geometry.getVVelocityBoundaryData(), 2 * M);
 
-  /** The maximum rate of advection is calculated by finding the maximum
+/** The current time step \f$ \Delta{t} \f$ rate of advection is calculated by finding the maximum
    *  lateral and transverse velocities in the problem domain, then combining
    *  both to gain a "worst-case" idea of the maximum velocity inside the
    *  domain. This is then compared against the CFL condition using the formula
-   *  \f[ \Delta{t} = \frac {\sigma h} {||{\vec v}||} \f]
-   *  where \f$\Delta{t}\f$ is the timestep, \f$\sigma\f$ is the CFL condition,
-   *  \f$h\f$ is the spacestep, and \f$\vec v\f$ is the "worst-case" maximum
-   *  velocity vector. 
-   */
+   *  \f[ \Delta{t} = \frac {\sigma h} {||{\vec u}||} \f]
+   *  where \f$\Delta{t}\f$ is the time step, \f$\sigma\f$ is the CFL number,
+   *  \f$h\f$ is the grid spacing, and \f$ \| \vec u \| f$ is the maximum velocity in
+   *  the domain.
+   **/
   double maxInteriorUVelocity = uVelocityVector.maxCoeff();
   double maxBoundaryUVelocity = uVelocityBoundaryVector.maxCoeff();
   double maxUVelocity = (maxInteriorUVelocity > maxBoundaryUVelocity) ? maxInteriorUVelocity : maxBoundaryUVelocity;
+
+  /** This needs to be rewritten, it is incorrect, since it is an overestimate of
+   *  the maximum velocity in the domain. EGP - 2015-09-27
+   */
+  /** The current time step \f[ \Delta{t} \f] is calculated by finding the maximum
+    *  lateral and  transverse velocities in the problem domain, then combining
+    *  both to gain a "worst-case" idea of the maximum velocity inside the
+    *  domain. This is then compared against the CFL condition using the formula
+    *  \f[ \Delt
+   **/
 
   double maxInteriorVVelocity = vVelocityVector.maxCoeff();
   double maxBoundaryVVelocity = vVelocityBoundaryVector.maxCoeff();
@@ -142,24 +152,31 @@ void ProblemStructure::recalculateTimestep() {
   double advectionDeltaT = cfl * h / sqrt (maxUVelocity * maxUVelocity + maxVVelocity * maxVVelocity);
   if (maxUVelocity == 0 || maxVVelocity == 0)
     advectionDeltaT = INT_MAX;
-  /** The calculation for the diffusion is similar, but much simpler. The
+
+  /** THIS IS INCORRECT! If the solver is explicit (e.g., first order Euler)
+   *  then there needs to be a 2 h*h or a 4 * h * h in the denominator!
+   *
+   *  Then the time step must be \f[ \Delta{t} = \frac {\sigma h} {\kappa} \f]
+   *  the maximum velocity in the domain. EGP - 2015-09-27:
+   * The calculation for the diffusion is similar, but much simpler. The
    *  diffusive delta-t is calculated using the formula
    *  \f[ \Delta{t} = \frac {\sigma h} {\kappa} \f]
    *  where \f$\Delta{t}\f$
+   *
    **/
-
   double diffusionDeltaT = cfl * h / diffusivity;
 
   if (advectionDeltaT < diffusionDeltaT) {
     deltaT = advectionDeltaT;
   } else {
     deltaT = diffusionDeltaT;
+    cout << "<CAUTION! Recalculated the time step as " << deltaT << "based on an IMPLICIT diffusion solver!>" << endl;
   }
 
   if (time + deltaT > endTime) { deltaT = endTime - time; }
 
   #ifdef DEBUG
-    cout << "<Recalculated timestep as " << deltaT << ">" << endl;
+    cout << "<Recalculated the time step as " << deltaT << ">" << endl;
   #endif
 }
 
