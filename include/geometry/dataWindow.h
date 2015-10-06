@@ -1,45 +1,38 @@
 #pragma once
 
-#include <string>
 #include <iostream>
+#include <cassert>
+
 #include <Eigen/Dense>
-#include <stdlib.h>
 
-using namespace Eigen;
-using namespace std;
+namespace e = Eigen;
 
-template<class T>
+template<typename T>
 class DataWindow {
   public:
-    DataWindow (T* _basePtr, unsigned int _columns, unsigned int _rows);
-    T& operator() (unsigned int _col, unsigned int _row);
-    const string displayMatrix();
+    DataWindow(T *basePtr,
+               unsigned int columns,
+               unsigned int rows) :
+        __basePtr(basePtr),
+        __cols(columns),
+        __rows(rows) {};
+		
+    T& operator()(unsigned int _col, unsigned int _row) {
+      // Ensure we haven't gone out-of-bounds on memory. There may be cases
+      // where we actually want to do that, but we can remove the assertion
+      // if that actually happens.
+      assert(_row * __cols + _col < __cols * __rows)
+      
+      // Column-major memory layout per Eigen.  
+      return __basePtr[_row * __cols + _col];
+    }
+    
+    void displayMatrix() {
+      std::cout << e::Map<e::Matrix<T, e::Dynamic, e::Dynamic, e::RowMajor> >(__basePtr, __rows, __cols).colwise().reverse();
+    }
+
   private:
-    T*           __basePtr;
-    unsigned int __cols;
-    unsigned int __rows;
+    T *const           __basePtr;
+    const unsigned int __cols;
+    const unsigned int __rows;
 };
-
-// Column-major data window, as per both Eigen and Visit.
-
-template<class T>
-DataWindow<T>::DataWindow (T* _basePtr, unsigned int _columns, unsigned int _rows) :
-    __basePtr (_basePtr),
-    __cols (_columns),
-    __rows (_rows) {};
-
-template<class T>
-T& DataWindow<T>::operator() (unsigned int _col, unsigned int _row) {
-	if (_row * __cols + _col < __cols * __rows )
-		return __basePtr[_row * __cols + _col];
-	else {
-		cout << "Out of bounds" << endl;
-		exit(-1);
-	}
-}
-
-template<class T>
-const string DataWindow<T>::displayMatrix() {
-  std::cout << Eigen::Map<Matrix<T, Dynamic, Dynamic, RowMajor> >(__basePtr, __rows, __cols).colwise().reverse();
-  return "";
-}
