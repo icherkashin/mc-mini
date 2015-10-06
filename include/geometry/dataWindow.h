@@ -21,7 +21,7 @@ class DataWindow {
       // Ensure we haven't gone out-of-bounds on memory. There may be cases
       // where we actually want to do that, but we can remove the assertion
       // if that actually happens.
-      assert(_row * __cols + _col < __cols * __rows)
+      assert(_row * __cols + _col < __cols * __rows);
       
       // Column-major memory layout per Eigen.  
       return __basePtr[_row * __cols + _col];
