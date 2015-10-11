@@ -1,6 +1,21 @@
 # Specify .cpp files
 set(TARGET_NAME ${PROJECT_NAME})
-set(SRC advection.cpp denseForms.cpp geometry.cpp paramTree.cpp problem.cpp sparseForms.cpp diffusion.cpp initialization.cpp output.cpp parser.cpp solveRoutines.cpp)
+set(SRC 
+  geometry/geometry.cpp
+
+  matrixForms/denseForms.cpp
+  matrixForms/sparseForms.cpp
+
+  output/output.cpp
+
+  parser/paramTree.cpp
+  parser/parser.cpp
+
+  problem/advection.cpp 
+  problem/diffusion.cpp
+  problem/initialization.cpp
+  problem/problem.cpp
+  problem/solveRoutines.cpp)
 
 # Build an executable from main.cpp and all the specified source files
 add_executable(${PROJECT_NAME} main.cpp ${SRC})
