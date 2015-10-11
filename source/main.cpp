@@ -2,19 +2,12 @@
 #include <iomanip>
 #include <cassert>
 
-#include <Eigen/OrderingMethods>
-#include <Eigen/SparseCholesky>
-#include <Eigen/SparseQR>
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
-
 #include "matrixForms/sparseForms.h"
 #include "matrixForms/denseForms.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "output/output.h"
 #include "parser/parser.h"
-
 
 using namespace Eigen;
 using namespace std;

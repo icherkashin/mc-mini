@@ -1,0 +1,19 @@
+language: cpp
+sudo: false
+cache:
+  apt: true
+addons:
+  apt:
+    packages:
+      - libboost-dev
+      - libhdf5-serial-dev
+env:
+  - EIGEN3_INCLUDE_DIR=include
+before_script:
+  - mkdir build
+  - cd build
+  - hg clone https://bitbucket.org/eigen/eigen
+  - mv eigen/Eigen ../include/Eigen
+script:
+  - cmake ..
+  - make

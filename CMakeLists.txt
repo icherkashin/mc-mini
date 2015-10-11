@@ -4,6 +4,8 @@ set(PROJECT_NAME mc-mini)
 set(PROJECT_VERSION 1.1.0)
 project(${PROJECT_NAME})
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
 # Enable/disable testing
 option(TESTS_ENABLED "Enable automatic tests" ON)
 # Enable/disable test coverage
@@ -55,6 +57,12 @@ include_directories(${Boost_INCLUDE_DIR})
 set(LIBRARIES ${LIBRARIES} ${Boost_LIBRARIES})
 
 # Eigen, a powerful linear algebra header-only library
+# Set EIGEN3_INCLUDE_DIR if it's set in ENV. This way TravisCI can use a
+# local copy of Eigen instead of the outdated version on apt.
+if(DEFINED ENV{EIGEN3_INCLUDE_DIR})
+  set(EIGEN3_INCLUDE_DIR $ENV{EIGEN3_INCLUDE_DIR})
+  message(STATUS "Using local Eigen3 headers")
+endif()
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
