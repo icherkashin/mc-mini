@@ -27,8 +27,10 @@ class DataWindow {
       return __basePtr[_row * __cols + _col];
     }
     
-    void displayMatrix() {
+    const std::string displayMatrix() {
       std::cout << e::Map<e::Matrix<T, e::Dynamic, e::Dynamic, e::RowMajor> >(__basePtr, __rows, __cols).colwise().reverse();
+      
+      return "";
     }
 
   private:
