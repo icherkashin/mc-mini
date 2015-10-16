@@ -31,6 +31,11 @@ else()
   set(Pthread "-pthread")
 endif()
 
+if(APPLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -U__STRICT_ANSI__")
+elseif(UNIX)
+endif()
+
 add_executable(${GTEST_TARGET} EXCLUDE_FROM_ALL ${TESTS_FILES})
 target_link_libraries(
     ${GTEST_TARGET}
