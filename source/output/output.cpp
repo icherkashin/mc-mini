@@ -35,12 +35,12 @@ OutputStructure::OutputStructure (ParamParser&       pp,
   }
 
   char s[128];
-  sprintf (s, "test -e %s", outputPath.c_str());
-  if (system (s) == 1) {
-    sprintf (s, "mkdir %s", outputPath.c_str());
-    if (system (s) == -1) {
+  sprintf(s, "test -e %s", outputPath.c_str());
+  if (system(s) != 0) {
+    sprintf(s, "mkdir %s", outputPath.c_str());
+    if (system(s) != 0) {
       cout << "<Error: couldn't create directory " << outputPath << ">" << endl;
-      exit (-1);;
+      exit(-1);;
     }
   }
 
