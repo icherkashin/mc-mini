@@ -1,14 +1,22 @@
 language: cpp
 sudo: false
+
+env:
+  - EIGEN3_INCLUDE_DIR=include
+
+compiler:
+  - gcc
+  - clang
+
 cache:
   apt: true
+
 addons:
   apt:
     packages:
       - libboost-dev
       - libhdf5-serial-dev
-env:
-  - EIGEN3_INCLUDE_DIR=include
+
 before_script:
   - mkdir build
   - cd build
