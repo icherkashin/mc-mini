@@ -27,14 +27,14 @@ int main(int argc, char ** argv) {
   OutputStructure   output   (parser, geometry, problem);
 
   problem.initializeProblem();
-  
+
   problem.updateForcingTerms();
   problem.solveStokes();
 
   problem.recalculateTimestep();
-  
-  do {    
-    output.writeHDF5File (problem.getTimestepNumber());
+
+  do {
+    output.writeHDF5File(problem.getTimestepNumber());
     cout << "<Timestep: " << problem.getTimestepNumber() << "; t=" << problem.getTime() << ">" << endl << endl;
     problem.updateForcingTerms();
     problem.solveStokes();
@@ -43,10 +43,10 @@ int main(int argc, char ** argv) {
 
   } while (problem.advanceTimestep());
 
-  output.writeHDF5File (problem.getTimestepNumber());
+  output.writeHDF5File(problem.getTimestepNumber());
   cerr << "Timestep: " << problem.getTimestepNumber() << "; t = " << problem.getTime() << endl;
 
   output.writeHDF5File();
-  
+
   return 0;
 }

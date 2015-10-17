@@ -2,65 +2,91 @@
 
 #include "parser/parser.h"
 
+/** \brief A simple wrapper class for geometry-specific data
+ *
+ *  The GeometryStructure class encapsulates all of the geometry-specific data
+ *  for a run, including. Specifically, it manages the size and position of the
+ *  raw data arrays underlying the temperature, velocity, pressure, forcing,
+ *  and viscosity fields
+ */
 class GeometryStructure {
   public:
-    GeometryStructure (ParamParser& pp);
+    GeometryStructure(ParamParser& pp);
     ~GeometryStructure();
-  
+
+    // The number of rows in the geometry
     int getM();
+    // The number of columns in the geometry
     int getN();
 
-    // Stokes Data
+    // The full Stokes data array
     double * getStokesData();
-    // Subsections of Stokes Data
+    // The Stokes velocity data array
     double * getVelocityData();
+    // The Stokes u-direction velocity data array
     double * getUVelocityData();
+    // The Stokes v-direction velocity data array
     double * getVVelocityData();
+    // The Stokes pressure data array
     double * getPressureData();
 
-    // Velocity Boundary Data
+    // The velocity boundary data array
     double * getVelocityBoundaryData();
-    // Subsections of Velocity Boundary Data
+    // The u-direction velocity boundary data array
     double * getUVelocityBoundaryData();
+    // The v-direction velocity boundary data array
     double * getVVelocityBoundaryData();
 
-    // Forcing Data
+    // The forcing data array
     double * getForcingData();
-    // Subsections of Forcing Data
+    // The u-direction forcing data array
     double * getUForcingData();
+    // The v-direction forcing data array
     double * getVForcingData();
 
-    // Viscosity Data 
+    // The viscosity data array
     double * getViscosityData();
 
-    // Temperature Data
+    // The temperature data array
     double * getTemperatureData();
 
-    // Temperature Boundary Data
+    // The full temperature boundary data array
     double * getTemperatureBoundaryData();
-    // Subsections of Temperature Boundary Data
+    // The u-direction temperature boundary data array
     double * getUTemperatureBoundaryData();
+    // The v-direction temperature boundary data array
     double * getVTemperatureBoundaryData();
-  
-  private:
-    // Geometry sizes
-    int M; // Rows in domain (y size)
-    int N; // Columns in domain (x size)
 
-    // Data pointers
-    // Stokes solution data contains velocity and pressure solutions.
+  private:
+    /** @defgroup GeoSizes Domain geometry sizes
+     *  @name Domain Geometry Sizes
+     *  @{
+     */
+    /// Number of rows in the domain
+    int M;
+    /// Number of columns in the domain
+    int N;
+
+    /** @} */
+
+    /** @defgroup DataPointers
+     *  @name Scalar Data Pointers
+     *  @{
+     */
+    /// Stokes solution data containing velocity and pressure values.
     double * stokesData;
-    // Velocity boundary data contains prescribed velocity boundary values.
+    /// Velocity boundary data containing prescribed velocity boundary values.
     double * velocityBoundaryData;
 
-    // Forcing data contains stokes equation forcing terms.
+    /// Forcing data containing stokes equation forcing terms
     double * forcingData;
 
-    // Viscosity data
+    /// Viscosity data
     double * viscosityData;
 
-    // Temperature data
+    /// Domain-interior temperature data
     double * temperatureData;
-    // Temperature Boundary Data
+    /// Domain-boundary temperature data
     double * temperatureBoundaryData;
+    /** @} */
 };
