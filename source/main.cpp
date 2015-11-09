@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
     throw std::invalid_argument("usage: " + std::string{argv[0]} + " <parameter file>.");
   }
 
-  ParamParser parser(string{argv[1]});
+  ParamParser parser(std::string{argv[1]});
   GeometryStructure geometry (parser);
   ProblemStructure  problem  (parser, geometry);
   OutputStructure   output   (parser, geometry, problem);
