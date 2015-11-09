@@ -1,5 +1,8 @@
 #pragma once
 
+#include <limits>
+#include <cmath>
+
 #include "parser/parser.h"
 
 /*! ProblemStructure holds all of the specific details and routines for the
@@ -55,7 +58,7 @@ class ProblemStructure {
           if (r <= 0)
             r = 0;
           else
-            r = UINT_MAX;
+            r = std::numeric_limits<double>::max();
         
         return max (0.0, min (1.0, r));
     }
@@ -69,7 +72,7 @@ class ProblemStructure {
           if (r <= 0)
             r = 0;
           else
-            r = UINT_MAX;
+            r = std::numeric_limits<double>::max();
 
         return max (max (0.0, min (2 * r, 1.0)), min (r, 2.0)) / 2; 
     }
@@ -82,7 +85,7 @@ class ProblemStructure {
           if (r <= 0)
             r = 0;
           else
-            r = UINT_MAX;
+            r = std::numeric_limits<double>::max();
 
         return (r + abs (r)) / (1 + abs (r)) / 2;
     }
