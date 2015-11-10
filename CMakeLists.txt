@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION 2.8)
 
 set(PROJECT_NAME mc-mini)
 set(PROJECT_VERSION 1.1.0)
-project(${PROJECT_NAME})
+
+if(CMAKE_VERSION LESS 3.0)
+  project(${PROJECT_NAME})
+else()
+# https://cmake.org/cmake/help/v3.0/policy/CMP0048.html#policy:CMP0048
+# The purpose of this command is to remove the error message about empty project version string related to this new cmake policy.
+  cmake_policy(SET CMP0048 NEW)
+  project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
