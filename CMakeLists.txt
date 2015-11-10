@@ -4,11 +4,14 @@ cmake_minimum_required(VERSION 2.8)
 # The purpose of this command is to remove the error message about empty project version string related to this new cmake policy.
 if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
+  set(PROJECT_NAME mc-mini)
+  set(PROJECT_VERSION 1.1.0)
+  project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
+else()
+  set(PROJECT_NAME mc-mini)
+  set(PROJECT_VERSION 1.1.0)
+  project(${PROJECT_NAME})
 endif()
-
-set(PROJECT_NAME mc-mini)
-set(PROJECT_VERSION 1.1.0)
-project(${PROJECT_NAME} VERSION ${PROJECT_VERSION})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
