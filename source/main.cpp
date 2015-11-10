@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 #include "geometry/geometry.h"
 #include "problem/problem.h"
