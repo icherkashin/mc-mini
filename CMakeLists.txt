@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 # https://cmake.org/cmake/help/v3.0/policy/CMP0048.html#policy:CMP0048
 # The purpose of this command is to remove the error message about empty project version string related to this new cmake policy.
-cmake_policy(SET CMP0048 NEW)
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+endif()
 
 set(PROJECT_NAME mc-mini)
 set(PROJECT_VERSION 1.1.0)
