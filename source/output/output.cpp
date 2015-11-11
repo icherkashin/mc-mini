@@ -197,7 +197,7 @@ void OutputStructure::writeHDF5File (const int timestep) {
 
   if (status == -1) {
       throw std::runtime_error("<H5Dwrite failed::" + boost::lexical_cast<std::string>(__FILE__) + ":" + boost::lexical_cast<std::string>(__LINE__) + ">");
-    }
+  }
 
   problemXdmfFile << "        <Attribute Name=\"VVelocity\" AttributeType=\"Scalar\" Center=\"Cell\">" << endl
                   << "          <DataItem Dimensions=\"" << M << " " << N << "\" NumberType=\"Float\" Precision=\"8\" Format=\"HDF\">" << endl
