@@ -14,11 +14,9 @@ class OutputStructure {
 
     ~OutputStructure();
 
-    void writeDefaultFile();
-    void writeDefaultFile (const int timestep);
+    void outputData (const int timestep = 0);
 
-    void writeHDF5File();
-    void writeHDF5File (int timestep);
+    void writeHDF5File (const int timestep = 0);
   
   private:
     ParamParser&       parser;

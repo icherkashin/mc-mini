@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <limits>
 
 #include <Eigen/Sparse>
 
@@ -59,8 +60,8 @@ ProblemStructure::ProblemStructure
     parser.getParamDouble   ("cfl",              cfl);
 
     parser.getParamDouble   ("startTime",        time);
-    parser.queryParamDouble ("endTime",          endTime, INT_MAX);
-    parser.queryParamInt    ("endStep",          endStep, INT_MAX);
+    parser.queryParamDouble ("endTime",          endTime, std::numeric_limits<int>::max());
+    parser.queryParamInt    ("endStep",          endStep, std::numeric_limits<int>::max());
     timestepNumber = 0;
 
     parser.queryParamDouble ("xExtent",          xExtent, 0.0);
@@ -151,7 +152,7 @@ void ProblemStructure::recalculateTimestep() {
   double maxVVelocity = (maxInteriorVVelocity > maxBoundaryVVelocity) ? maxInteriorVVelocity : maxBoundaryVVelocity;
   double advectionDeltaT = cfl * h / sqrt (maxUVelocity * maxUVelocity + maxVVelocity * maxVVelocity);
   if (maxUVelocity == 0 || maxVVelocity == 0)
-    advectionDeltaT = INT_MAX;
+    advectionDeltaT = std::numeric_limits<int>::max();
 
   /** THIS IS INCORRECT! If the solver is explicit (e.g., first order Euler)
    *  then there needs to be a 2 h*h or a 4 * h * h in the denominator!
