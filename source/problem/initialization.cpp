@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <stdexcept>
+
 #include <Eigen/Sparse>
 
 #include "matrixForms/sparseForms.h"
@@ -109,8 +111,7 @@ void ProblemStructure::initializeTemperature() {
            temperatureWindow (j, i) = referenceTemperature; 
        }
   } else {
-    cerr << "<Unexpected temperature model: \"" << boundaryModel << "\" : Shutting down now>" << endl;
-    exit(-1);
+    throw std::invalid_argument("<Unexpected temperature model: \"" + temperatureModel + "\" : Shutting down now>");
   }
 
   #ifdef DEBUG
@@ -165,8 +166,7 @@ void ProblemStructure::initializeVelocityBoundary() {
       for (int j = 0; j < N; ++j)
         vVelocityBoundaryWindow (j, i) = 0;
   } else {
-    cerr << "<Unexpected boundary model: \"" << boundaryModel << "\" : Shutting down now>" << endl;
-    exit(-1);
+    throw std::invalid_argument("<Unexpected boundary model: \"" + boundaryModel + "\" : Shutting down now>");
   }
 
   #ifdef DEBUG
@@ -209,8 +209,7 @@ void ProblemStructure::initializeViscosity() {
       for (int j = 0; j < (N + 1); ++j)
         viscosityWindow (j, i) = 1.0 + j * h * 1.0E06;
   } else {
-    cerr << "Unexpected viscosity model: \"" << viscosityModel << "\" : Shutting down now!" << endl;
-    exit(-1);
+    throw std::invalid_argument("Unexpected viscosity model: \"" + viscosityModel + "\" : Shutting down now!");
   }
 
   #ifdef DEBUG

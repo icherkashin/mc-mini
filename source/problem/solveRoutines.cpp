@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <stdexcept>
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
@@ -96,8 +97,7 @@ void ProblemStructure::updateForcingTerms() {
                                       referenceTemperature));
       }
   } else {
-    cerr << "<Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now>" << endl;
-    exit(-1);
+    throw std::runtime_error("<Unexpected forcing model: \"" + forcingModel + "\" : Shutting down now>");
   }
 
   #ifdef DEBUG
@@ -182,8 +182,7 @@ void ProblemStructure::solveAdvectionDiffusion() {
     frommMethod();
   } else if (advectionMethod == "none") {
   } else {
-    cerr << "<Unexpected advection method: \"" << advectionMethod << "\" : Shutting down now>" << endl;
-    exit (-1);
+    throw std::runtime_error("<Unexpected advection method: \"" + advectionMethod + "\" : Shutting down now>");
   }
   
   #ifdef DEBUG
@@ -197,8 +196,7 @@ void ProblemStructure::solveAdvectionDiffusion() {
     crankNicolson();
   } else if (diffusionMethod == "none") {
   } else {  
-    cerr << "<Unexpected diffusion method: \"" << diffusionMethod << "\" : Shutting down now>" << endl;
-    exit (-1);
+    throw std::runtime_error("<Unexpected diffusion method: \"" + diffusionMethod + "\" : Shutting down now>"); 
   }
  
   #ifdef DEBUG

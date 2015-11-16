@@ -9,7 +9,6 @@
 
 #include <Eigen/Sparse>
 
-#include "matrixForms/sparseForms.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
 #include "parser/parser.h"
