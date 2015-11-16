@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <ios>
+#include <stdexcept>
 
 #include "parser/paramTree.h"
 #include "parser/parser.h"
@@ -15,13 +16,11 @@ ParamParser::ParamParser (const string paramFile) {
 
   ifstream paramStream(paramFile);
   if (paramStream.fail()) {
-    cerr << "<Error> Opening parameter file \"" << paramFile 
-         << "\" failed! Shutting down now." << endl;
-    exit (-1);
+    throw std::runtime_error("<Error> Opening parameter file \"" + paramFile + "\" failed! Shutting down now.");
   }
   string lineBuf;
   vector<string> parseBuf, paramBuf;
-  
+
   this->treeBase = new ParamTree;
 
   getline (paramStream, lineBuf);
@@ -65,8 +64,7 @@ bool ParamParser::push (string key) {
     treeBase->moveUp (key);
     return true;
   } catch (exception& e) {
-    cerr << e.what() << ": " << key << "; Exiting now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting now.");
   }
   return false;
 }
@@ -85,8 +83,7 @@ void ParamParser::pop () {
   try {
     treeBase->moveDown ();
   } catch (exception& e) {
-    cerr << e.what() << "; Exiting now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + "; Exiting now.");
   }
 }
 
@@ -94,8 +91,7 @@ void ParamParser::getParamString (string key, string& result) {
   try {
     result = treeBase->getParam (key);
   } catch (exception& e) {
-    cerr << e.what() << ": " << key << "; Exiting now." << endl;
-    exit(-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting now.");
   }
   cerr << key << " = " << result << endl; 
 }
@@ -114,8 +110,7 @@ void ParamParser::getParamStringVect (string key, vector<string>& result) {
   try {
     result = stringSplit (treeBase->getParam (key));
   } catch (exception& e) {
-    cerr << e.what() << ": " << key << "; Exiting now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting now.");
   }
 }
 
@@ -131,11 +126,10 @@ void ParamParser::queryParamStringVect (string key, vector<string>& result, cons
 void ParamParser::getParamInt (string key, int& result) {
   try {
     string tempBuf = treeBase->getParam (key);
-    
+
     result = stoi (tempBuf);
   } catch (exception& e) {
-    cerr << e.what () << ": " << key << "; Exiting now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting now.");
   }
 }
 
@@ -160,8 +154,7 @@ void ParamParser::getParamIntVect (string key, vector<int>& result) {
       result.push_back (stoi(*it));
     }
   } catch (exception& e) {
-    cerr << e.what () << ": " << key << "; Exiting Now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting Now.");
   }
 }
 
@@ -182,8 +175,7 @@ void ParamParser::getParamDouble (string key, double& result) {
     string tempBuf = treeBase->getParam (key);
     result = stod (tempBuf);
   } catch (exception& e) {
-    cerr << e.what () << ": " << key << "; Exiting now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what()) + ": " + key + "; Exiting now.");
   }
 }
 
@@ -207,8 +199,7 @@ void ParamParser::getParamDoubleVect (string key, vector<double>& result) {
     
     for (vector<string>::iterator it = tempVect.begin(); it != tempVect.end(); ++it) result.push_back (stod(*it));
   } catch (exception& e) {
-    cerr << e.what () << ": " << key << "; Exiting Now." << endl;
-    exit (-1);
+    throw std::runtime_error(string(e.what ()) + ": " + key + "; Exiting Now.");
   }
 }
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <stdexcept>
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
@@ -429,8 +430,7 @@ void ProblemStructure::frommMethod() {
                                             referenceTemperature));
       }
   } else {
-    cout << "<Unexpected forcing model: \"" << forcingModel << "\" : Shutting down now>" << endl;
-    exit(-1);
+    throw std::runtime_error("<Unexpected forcing model: \"" + forcingModel + "\" : Shutting down now>");
   }
 
   #ifdef DEBUG
