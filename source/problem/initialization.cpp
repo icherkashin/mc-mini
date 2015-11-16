@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <stdexcept>
+
 #include <Eigen/Sparse>
 
 #include "matrixForms/sparseForms.h"

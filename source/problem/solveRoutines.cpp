@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <stdexcept>
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
