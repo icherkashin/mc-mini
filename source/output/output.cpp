@@ -12,9 +12,9 @@
 #include "parser/parser.h"
 #include "output/output.h"
 
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
 
-using namespace Eigen;
+// using namespace Eigen;
 using namespace std;
 
 OutputStructure::OutputStructure (ParamParser&       pp,
