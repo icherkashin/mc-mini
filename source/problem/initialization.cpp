@@ -1,12 +1,7 @@
 #include <iostream>
-#include <cassert>
 #include <cmath>
-#include <algorithm>
 #include <stdexcept>
 
-#include <Eigen/Sparse>
-
-#include "matrixForms/sparseForms.h"
 #include "geometry/dataWindow.h"
 #include "geometry/geometry.h"
 #include "problem/problem.h"
