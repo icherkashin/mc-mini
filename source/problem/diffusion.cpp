@@ -1,6 +1,4 @@
 #include <iostream>
-#include <cassert>
-#include <cmath>
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
