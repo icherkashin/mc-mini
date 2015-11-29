@@ -8,11 +8,13 @@
 #include "parser/parser.h"
 #include "debug.h"
 
+#include "boost/math/constants/constants.hpp"
+
 /*
  *
  * Data initialization routines
  *
- */ 
+ */
 
 void ProblemStructure::initializeProblem() {
   initializeTimestep();
@@ -25,7 +27,7 @@ void ProblemStructure::initializeProblem() {
 void ProblemStructure::initializeTimestep() {
   deltaT = cfl * h / diffusivity;
   int nTimestep = (endTime - time) / deltaT;
-  if (abs (nTimestep * deltaT + time - endTime) > 1E-06) 
+  if (abs (nTimestep * deltaT + time - endTime) > 1E-06)
     deltaT = (endTime - time) / ++nTimestep;
   #ifdef DEBUG
     std::cout << "<Timestep initialized to " << deltaT << ">" << std::endl;
@@ -44,16 +46,16 @@ void ProblemStructure::initializeTemperature() {
       parser.queryParamDouble ("temperatureScale",     temperatureScale,     100.0);
 
       parser.pop();
-    } 
+    }
     parser.pop();
   }
-  
+
   if (temperatureModel == "constant") {
-    
+
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N; ++j)
         temperatureWindow (j, i) = referenceTemperature;
-   
+
   } else if (temperatureModel == "sineWave") {
     int xModes;
     int yModes;
@@ -64,7 +66,7 @@ void ProblemStructure::initializeTemperature() {
         parser.queryParamInt ("yModes", yModes, 2);
 
         parser.pop();
-      } 
+      }
 
       parser.pop();
     }
@@ -72,8 +74,8 @@ void ProblemStructure::initializeTemperature() {
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N; ++j)
         temperatureWindow (j, i) = referenceTemperature +
-                                   sin ((i + 0.5) * h * xModes * M_PI / xExtent) * 
-                                   sin ((j + 0.5) * h * yModes * M_PI / yExtent) * 
+                                   sin ((i + 0.5) * h * xModes * boost::math::constants::pi<double>() / xExtent) *
+                                   sin ((j + 0.5) * h * yModes * boost::math::constants::pi<double>() / yExtent) *
                                    temperatureScale;
 
   } else if (temperatureModel == "squareWave") {
@@ -103,7 +105,7 @@ void ProblemStructure::initializeTemperature() {
          if ( std::sqrt(std::pow((i*h+h/2)-(center_y),2.0) + std::pow((j*h+h/2)-(center_x),2.0))  < radius )
            temperatureWindow (j, i) = referenceTemperature + temperatureScale;
          else
-           temperatureWindow (j, i) = referenceTemperature; 
+           temperatureWindow (j, i) = referenceTemperature;
        }
   } else {
     throw std::invalid_argument("<Unexpected temperature model: \"" + temperatureModel + "\" : Shutting down now>");
@@ -129,7 +131,7 @@ void ProblemStructure::initializeTemperatureBoundary() {
 
       parser.pop();
     }
-    
+
     parser.pop();
   }
 
@@ -182,7 +184,7 @@ void ProblemStructure::initializeViscosity() {
     if (parser.push ("problemParams")) {
       if (parser.tryPush ("initialViscosity")) {
         parser.queryParamDouble ("viscosityScale", viscosity, 1.0);
-      
+
         parser.pop();
       } else {
         viscosity = 1.0;
@@ -197,7 +199,7 @@ void ProblemStructure::initializeViscosity() {
     viscosity = 1.0;
   } else if (viscosityModel == "solCXBenchmark") {
     for (int i = 0; i < (M + 1); ++i)
-      for (int j = 0; j < (N + 1); ++j) 
+      for (int j = 0; j < (N + 1); ++j)
         viscosityWindow (j, i) = (j <= N / 2) ? 1.0 : 1.0E06;
   } else if (viscosityModel == "solKZBenchmark") {
     for (int i = 0; i < (M + 1); ++i)
