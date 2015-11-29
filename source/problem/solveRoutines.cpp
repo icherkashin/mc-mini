@@ -18,6 +18,7 @@
 #include "parser/parser.h"
 
 #include "boost/math/constants/constants.hpp"
+const double pi = boost::math::constants::pi<double>();
 
 using namespace Eigen;
 using namespace std;
@@ -57,7 +58,7 @@ void ProblemStructure::updateForcingTerms() {
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingWindow (j, i) = - sin((i + 0.5) * boost::math::constants::pi<double>() * h) * cos ((j + 1) * boost::math::constants::pi<double>() * h);
+        vForcingWindow (j, i) = - sin((i + 0.5) * pi * h) * cos ((j + 1) * pi * h);
 
   } else if (forcingModel == "vorticalFlow") {
     for (int i = 0; i < M; ++i)

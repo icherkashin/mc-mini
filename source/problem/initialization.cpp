@@ -9,6 +9,7 @@
 #include "debug.h"
 
 #include "boost/math/constants/constants.hpp"
+const double pi = boost::math::constants::pi<double>();
 
 /*
  *
@@ -74,8 +75,8 @@ void ProblemStructure::initializeTemperature() {
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N; ++j)
         temperatureWindow (j, i) = referenceTemperature +
-                                   sin ((i + 0.5) * h * xModes * boost::math::constants::pi<double>() / xExtent) *
-                                   sin ((j + 0.5) * h * yModes * boost::math::constants::pi<double>() / yExtent) *
+                                   sin ((i + 0.5) * h * xModes * pi / xExtent) *
+                                   sin ((j + 0.5) * h * yModes * pi / yExtent) *
                                    temperatureScale;
 
   } else if (temperatureModel == "squareWave") {
