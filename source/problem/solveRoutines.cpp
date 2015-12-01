@@ -17,6 +17,9 @@
 #include "problem/problem.h"
 #include "parser/parser.h"
 
+#include "boost/math/constants/constants.hpp"
+const double pi = boost::math::constants::pi<double>();
+
 using namespace Eigen;
 using namespace std;
 
@@ -24,7 +27,7 @@ using namespace std;
  *
  * Main loop routines
  *
- */ 
+ */
 
 // Update the forcing terms
 // T -> F
@@ -55,15 +58,15 @@ void ProblemStructure::updateForcingTerms() {
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingWindow (j, i) = - sin((i + 0.5) * M_PI * h) * cos ((j + 1) * M_PI * h);
+        vForcingWindow (j, i) = - sin((i + 0.5) * pi * h) * cos ((j + 1) * pi * h);
 
   } else if (forcingModel == "vorticalFlow") {
     for (int i = 0; i < M; ++i)
-      for (int j = 0; j < (N - 1); j++) 
+      for (int j = 0; j < (N - 1); j++)
         uForcingWindow (j, i) = cos ((j + 1) * h) * sin ((i + 0.5) * h);
 
     for (int i = 0; i < (M - 1); ++i)
-      for (int j = 0; j < N; ++j) 
+      for (int j = 0; j < N; ++j)
         vForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "buoyancy") {
@@ -90,8 +93,8 @@ void ProblemStructure::updateForcingTerms() {
     for (int i = 0; i < (M - 1); ++i)
       for (int j = 0; j < N; ++j) {
         vForcingWindow (j, i) =  -1 * densityConstant *
-                                  (1 - thermalExpansion * 
-                                   ((temperatureWindow (j, i) + 
+                                  (1 - thermalExpansion *
+                                   ((temperatureWindow (j, i) +
                                      temperatureWindow (j, i + 1)) / 2 -
                                       referenceTemperature));
       }
@@ -111,7 +114,7 @@ void ProblemStructure::updateForcingTerms() {
 // F -> U X P
 void ProblemStructure::solveStokes() {
   Map<VectorXd> stokesSolnVector (geometry.getStokesData(), M * (N - 1) + (M - 1) * N + M * N);
-  
+
   #ifndef USE_DENSE
   static SparseMatrix<double> stokesMatrix   (3 * M * N - M - N, 3 * M * N - M - N);
   static SparseMatrix<double> forcingMatrix  (3 * M * N - M - N, 2 * M * N - M - N);
@@ -151,7 +154,7 @@ void ProblemStructure::solveStokes() {
     initialized = true;
   }
 
-  stokesSolnVector = solver.solve (forcingMatrix  * Map<VectorXd>(geometry.getForcingData(), 2 * M * N - M - N) + 
+  stokesSolnVector = solver.solve (forcingMatrix  * Map<VectorXd>(geometry.getForcingData(), 2 * M * N - M - N) +
                                    boundaryMatrix * Map<VectorXd>(geometry.getVelocityBoundaryData(), 2 * M + 2 * N));
 
   Map<VectorXd> pressureVector (geometry.getPressureData(), M * N);
@@ -183,7 +186,7 @@ void ProblemStructure::solveAdvectionDiffusion() {
   } else {
     throw std::runtime_error("<Unexpected advection method: \"" + advectionMethod + "\" : Shutting down now>");
   }
-  
+
   #ifdef DEBUG
     cout << "<Using \"" << diffusionMethod << "\" for diffusion>" << endl;
   #endif
@@ -194,10 +197,10 @@ void ProblemStructure::solveAdvectionDiffusion() {
   } else if (diffusionMethod == "crankNicolson") {
     crankNicolson();
   } else if (diffusionMethod == "none") {
-  } else {  
-    throw std::runtime_error("<Unexpected diffusion method: \"" + diffusionMethod + "\" : Shutting down now>"); 
+  } else {
+    throw std::runtime_error("<Unexpected diffusion method: \"" + diffusionMethod + "\" : Shutting down now>");
   }
- 
+
   #ifdef DEBUG
     cout << "<Finished Advection/Diffusion Step>" << endl << endl;
   #endif
