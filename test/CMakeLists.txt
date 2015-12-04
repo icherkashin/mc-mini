@@ -56,8 +56,7 @@ add_dependencies(check ${GTEST_TARGET})
 
 if(COVERAGE_ENABLED)
   find_package(gcovr REQUIRED)
-  target_link_libraries(${GTEST_TARGET} -lgcov)
-  add_custom_target(coverage WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${GCOVR_EXECUTABLE} -r ${CMAKE_SOURCE_PATH}/src --xml -o ${CMAKE_BINARY_DIR}/coverage.xml)
+  add_custom_target(coverage WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND ${GCOVR_EXECUTABLE} -r ${CMAKE_BINARY_DIR} -f".*mc-mini.*" --xml-pretty -details -o ${CMAKE_BINARY_DIR}/coverage.xml)
   add_dependencies(coverage check)
 endif()
 
