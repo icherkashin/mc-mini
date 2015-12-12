@@ -4,7 +4,7 @@ enter geometryParams
   # Rows in the problem domain
   set M=32
   # Columns in the problem domain
-  set N=65
+  set N=64
 leave
 
 # Problem parameter section. Includes parameters describing the specifics of the
@@ -30,7 +30,7 @@ enter problemParams
   set diffusivity=1.0
   set buoyancy=1.0
   # Forcing model for the given problem. Options include:
-  # tauBenchmark : 
+  # tauBenchmark :
   #     Forcing model taken from Tau (1991; JCP Vol. 99). No additional
   #     parameters required
   #
@@ -63,15 +63,15 @@ enter problemParams
   #     Constant temperature initial conditions. Extremely uninteresting.
   #
   # sineWave :
-  #     Sine wave temperature initial conditions. a wave of amplitude given by 
+  #     Sine wave temperature initial conditions. a wave of amplitude given by
   #     temperatureScale with xModes and yModes modes in the x and y-direction,
   #     respectively. Additional parameters for xModes and yModes are required.
   #
   # squareWave :
-  #     Square wave temperature initial conditions. Creates a 2D square wave 
-  #     perturbation in a background of temperature referenceTempreature with 
+  #     Square wave temperature initial conditions. Creates a 2D square wave
+  #     perturbation in a background of temperature referenceTempreature with
   #     amplitude given by referenceTempreature.
-  # 
+  #
   # circle:
   # 	Creates a circular temperature initial condition around the user defined center.
   #	Moreover, the center can be moved within the domain --> (xCenter, yCenter)
@@ -103,7 +103,7 @@ enter problemParams
   leave
 
   # Viscosity model for the given problem. Options include:
-  # 
+  #
   # constant :
   #     Constant viscosity conditions throughout the domain. Additional
   #     viscosityScale parameter is required.
@@ -166,7 +166,7 @@ enter problemParams
   leave
 
   # Method for calculating temperature diffusion. Options include:
-  # 
+  #
   # forwardEuler :
   #      Simple but unstable first-order diffusion method.
   #
