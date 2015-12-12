@@ -14,7 +14,7 @@ namespace SparseForms {
                          const int N,
                          const double h,
                          const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << 3 * M * N - M - N << "x" << 3 * M * N - M - N << " stokesMatrix>" << endl;
     #endif
 
@@ -26,7 +26,7 @@ namespace SparseForms {
     makeGradYBlock      (tripletList, M * (N - 1),       2 * M * N - M - N, M, N, h);
     makeDivXBlock       (tripletList, 2 * M * N - M - N, 0,                 M, N, h);
     makeDivYBlock       (tripletList, 2 * M * N - M - N, M * (N - 1),       M, N, h);
-    
+
     stokesMatrix.setFromTriplets (tripletList.begin(), tripletList.end());
     #ifdef DEBUG
       cout << endl;
@@ -40,50 +40,50 @@ namespace SparseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * (N - 1) << "x" << M * (N - 1) << " LaplacianXBlock>" << endl;
     #endif
 
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < (N - 1); ++j) {
-        double viscosity = (viscosityWindow (j + 1, i) + viscosityWindow (j + 1, i + 1)) / 2;
-        
+        double viscosity = (viscosityWindow (i, j + 1) + viscosityWindow (i + 1, j + 1)) / 2;
+
         // First and last rows are non-standard because the laplacian would sample points which
-        // do not exist in our gridding. 
+        // do not exist in our gridding.
         if (i == 0 || i == (M - 1))
           tripletList.push_back (
-              Triplet<double> (M0 + i * (N - 1) + j, 
-                               N0 + i * (N - 1) + j, 
+              Triplet<double> (M0 + i * (N - 1) + j,
+                               N0 + i * (N - 1) + j,
                                viscosity * 5 / (h * h)));
         else
           tripletList.push_back (
-              Triplet<double> (M0 + i * (N - 1) + j, 
-                               N0 + i * (N - 1) + j, 
+              Triplet<double> (M0 + i * (N - 1) + j,
+                               N0 + i * (N - 1) + j,
                                viscosity * 4 / (h * h)));
 
         // First and last rows are missing a neighbor in one of two directions
         if (i > 0)
           tripletList.push_back (
-              Triplet<double> (M0 + i       * (N - 1) + j, 
-                               N0 + (i - 1) * (N - 1) + j, 
+              Triplet<double> (M0 + i       * (N - 1) + j,
+                               N0 + (i - 1) * (N - 1) + j,
                                -viscosity / (h * h)));
         if (i < (M - 1))
           tripletList.push_back (
-              Triplet<double> (M0 + i       * (N - 1) + j, 
-                               N0 + (i + 1) * (N - 1) + j, 
+              Triplet<double> (M0 + i       * (N - 1) + j,
+                               N0 + (i + 1) * (N - 1) + j,
                                -viscosity / (h * h)));
 
-        // First and last elements of each row are missing a neighbor in one of two directions 
+        // First and last elements of each row are missing a neighbor in one of two directions
         if (j > 0)
           tripletList.push_back (
-              Triplet<double> (M0 + i * (N - 1) + j, 
-                               N0 + i * (N - 1) + j - 1, 
+              Triplet<double> (M0 + i * (N - 1) + j,
+                               N0 + i * (N - 1) + j - 1,
                                -viscosity / (h * h)));
         if (j < (N - 2))
           tripletList.push_back (
-              Triplet<double> (M0 + i * (N - 1) + j, 
-                               N0 + i * (N - 1) + j + 1, 
+              Triplet<double> (M0 + i * (N - 1) + j,
+                               N0 + i * (N - 1) + j + 1,
                                -viscosity / (h * h)));
       }
     }
@@ -103,8 +103,8 @@ namespace SparseForms {
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < (M - 1); ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityWindow (j, i + 1) + viscosityWindow (j + 1, i + 1)) / 2;
-        
+        double viscosity = (viscosityWindow (i + 1, j) + viscosityWindow (i + 1, j + 1)) / 2;
+
         // The first and last elements of each row are non-standard because the four-point
         // laplacian relies upon points not included in our gridding
         if ((j == 0) || (j == (N - 1)))
@@ -179,7 +179,7 @@ namespace SparseForms {
                       const int M,
                       const int N,
                       const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << (M - 1) * N << " DivXBlock>" << endl;
     #endif
 
@@ -217,9 +217,9 @@ namespace SparseForms {
 
     for (int i = 0; i < 2 * M * N - M - N; ++i)
       tripletList.push_back (Triplet<double> (i, i, 1));
-  
+
     forcingMatrix.setFromTriplets (tripletList.begin (), tripletList.end ());
-    
+
     #ifdef DEBUG
       cout << endl;
     #endif
@@ -230,7 +230,7 @@ namespace SparseForms {
                            const int N,
                            const double h,
                            const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << 3 * M * N - M - N << "x" << 2 * M + 2 * N << " BoundaryMatrix>" << endl;
     #endif
 
@@ -262,7 +262,7 @@ namespace SparseForms {
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < 2; ++j) {
-        double viscosity = (viscosityWindow (j * N, i) + viscosityWindow (j * N, i + 1)) / 2;
+        double viscosity = (viscosityWindow (i, j * N) + viscosityWindow (i + 1, j * N)) / 2;
         tripletList.push_back (Triplet<double> (M0 + i * (N - 1) + j * (N - 2),
                                                 N0 + i * 2       + j,
                                                 viscosity / (h * h)));
@@ -284,9 +284,9 @@ namespace SparseForms {
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < 2; ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityWindow (j, i * M) + viscosityWindow (j + 1, i * M)) / 2;
-        tripletList.push_back (Triplet<double> (M0 + i * (M - 2) * N + j,  
-                                                N0 + i           * N + j, 
+        double viscosity = (viscosityWindow (i * M, j) + viscosityWindow (i * M, j + 1)) / 2;
+        tripletList.push_back (Triplet<double> (M0 + i * (M - 2) * N + j,
+                                                N0 + i           * N + j,
                                                 viscosity / (h * h)));
       }
     }
@@ -298,7 +298,7 @@ namespace SparseForms {
                         const int M,
                         const int N,
                         const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << 2 * M << " BCDivXBlock>" << endl;
     #endif
 
@@ -314,7 +314,7 @@ namespace SparseForms {
                         const int M,
                         const int N,
                         const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << 2 * N << " BCDivYBlock>" << endl;
     #endif
 

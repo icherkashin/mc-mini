@@ -26,7 +26,7 @@ namespace DenseForms {
     makeGradYBlock      (stokesMatrix.block (M * (N - 1),       2 * M * N - M - N, (M - 1) * N, M * N),       M, N, h);
     makeDivXBlock       (stokesMatrix.block (2 * M * N - M - N, 0,                  M * N,      M * (N - 1)), M, N, h);
     makeDivYBlock       (stokesMatrix.block (2 * M * N - M - N, M * (N - 1),        M * N,      (M - 1) * N), M, N, h);
-  
+
     #ifdef DEBUG
       cout << endl;
     #endif
@@ -37,14 +37,14 @@ namespace DenseForms {
                             const int N,
                             const double h,
                             const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * (N - 1) << "x" << M * (N - 1) << " LaplacianXBlock>" << endl;
     #endif
-    DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1); 
+    DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
 
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < (N - 1); ++j) {
-        double viscosity = (viscosityWindow (j + 1, i) + viscosityWindow (j + 1, i + 1)) / 2;
+        double viscosity = (viscosityWindow (i, j + 1) + viscosityWindow (i + 1, j + 1)) / 2;
 
         // First and last rows are non-standard because the laplacian would sample points which
         // do not exist in our gridding.
@@ -78,7 +78,7 @@ namespace DenseForms {
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < (M - 1); ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityWindow (j, i + 1) + viscosityWindow (j + 1, i + 1)) / 2;
+        double viscosity = (viscosityWindow (i + 1, j) + viscosityWindow (i + 1, j + 1)) / 2;
 
         // The first and last elements of each row are non-standard because the four-point
         // laplacian relies upon points not included in our gridding
@@ -109,7 +109,7 @@ namespace DenseForms {
     #ifdef DEBUG
       cout << "<Creating " << M * (N - 1) << "x" << M * N << " GradXBLock>" << endl;
     #endif
-    
+
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < (N - 1); ++j) {
         grad (i * (N - 1) + j, i * N + j)       = -1 / h;
@@ -152,10 +152,10 @@ namespace DenseForms {
                       const int M,
                       const int N,
                       const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << (M - 1) * N << " DivYBlock>" << endl;
     #endif
-   
+
     for (int i = 0; i < (M - 1) * N; ++i) {
       div (i,     i) =  1 / h;
       div (i + N, i) = -1 / h;
@@ -184,10 +184,10 @@ namespace DenseForms {
                            const int N,
                            const double h,
                            const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << 3 * M * N - M - N << "x" << 2 * M + 2 * N << " BoundaryMatrix>" << endl;
     #endif
-    
+
     boundaryMatrix = MatrixXd::Zero (3 * M * N - M - N, 2 * M + 2 * N);
 
     makeBCLaplacianXBlock (boundaryMatrix.block (0,                 0,     M * (N - 1), 2 * M), M, N, h, viscosityData);
@@ -201,14 +201,14 @@ namespace DenseForms {
                               const int N,
                               const double h,
                               const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * (N - 1) << "x" << 2 * M << " BCLaplacianXBlock>" << endl;
     #endif
-   
+
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < M; ++i) {
       for (int j = 0; j < 2; ++j) {
-        double viscosity = (viscosityWindow (j * N, i) + viscosityWindow (j * N, i + 1)) / 2;
+        double viscosity = (viscosityWindow (i, j * N) + viscosityWindow (i + 1, j * N)) / 2;
         laplacianBC (i * (N - 1) + j * (N - 2), i * 2 + j) = viscosity / (h * h);
       }
     }
@@ -219,14 +219,14 @@ namespace DenseForms {
                               const int N,
                               const double h,
                               const double * viscosityData) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << (M - 1) * N << "x" << 2 * N << " BCLaplacianYBlock>" << endl;
     #endif
 
     DataWindow<const double> viscosityWindow (viscosityData, N + 1, M + 1);
     for (int i = 0; i < 2; ++i) {
       for (int j = 0; j < N; ++j) {
-        double viscosity = (viscosityWindow (j, i * M) + viscosityWindow (j + 1, i * M)) / 2;
+        double viscosity = (viscosityWindow (i * M, j) + viscosityWindow (i * M, j + 1)) / 2;
         laplacianBC (i * (M - 2) * N + j, i * N + j) = viscosity / (h * h);
       }
     }
@@ -236,10 +236,10 @@ namespace DenseForms {
                         const int M,
                         const int N,
                         const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << 2 * M << " BCDivXBlock>" << endl;
     #endif
-  
+
     for (int i = 0; i < M; ++i) {
       divBC (i *       N,     i * 2)     =  1 / h;
       divBC ((i + 1) * N - 1, i * 2 + 1) = -1 / h;
@@ -250,9 +250,9 @@ namespace DenseForms {
                         const int M,
                         const int N,
                         const double h) {
-    #ifdef DEBUG 
+    #ifdef DEBUG
       cout << "<Creating " << M * N << "x" << 2 * N << " BCDivYBlock>" << endl;
-    #endif  
+    #endif
 
     for (int i = 0; i < N; ++i) {
       divBC (              i,     i) =  1 / h;
@@ -261,4 +261,4 @@ namespace DenseForms {
   }
 }
 
-  
+

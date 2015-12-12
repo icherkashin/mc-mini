@@ -34,7 +34,7 @@ class DataWindow {
      *  Accesses the scalar value at the position (**col**, **row**) by
      *  calculating the offset from the base data pointer.
      */
-    T& operator()(unsigned int _col, unsigned int _row) {
+    T& operator()(unsigned int _row, unsigned int _col) {
       // Ensure we haven't gone out-of-bounds on memory. There may be cases
       // where we actually want to do that, but we can remove the assertion
       // if that actually happens.

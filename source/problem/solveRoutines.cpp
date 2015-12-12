@@ -43,31 +43,31 @@ void ProblemStructure::updateForcingTerms() {
     // Benchmark taken from Tau (1991; JCP Vol. 99)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
-        uForcingWindow (j, i) = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
+        uForcingWindow (i, j) = 3 * cos ((j + 1) * h) * sin ((i + 0.5) * h);
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
+        vForcingWindow (i, j) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "solCXBenchmark" ||
              forcingModel == "solKZBenchmark") {
     // solCX Benchmark taken from Kronbichler et al. (2011)
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < N - 1; ++j)
-        uForcingWindow (j, i) = 0;
+        uForcingWindow (i, j) = 0;
 
     for (int i = 0; i < M - 1; ++i)
       for (int j = 0; j < N; ++j)
-        vForcingWindow (j, i) = - sin((i + 0.5) * pi * h) * cos ((j + 1) * pi * h);
+        vForcingWindow (i, j) = - sin((i + 0.5) * pi * h) * cos ((j + 1) * pi * h);
 
   } else if (forcingModel == "vorticalFlow") {
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < (N - 1); j++)
-        uForcingWindow (j, i) = cos ((j + 1) * h) * sin ((i + 0.5) * h);
+        uForcingWindow (i, j) = cos ((j + 1) * h) * sin ((i + 0.5) * h);
 
     for (int i = 0; i < (M - 1); ++i)
       for (int j = 0; j < N; ++j)
-        vForcingWindow (j, i) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
+        vForcingWindow (i, j) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "buoyancy") {
     DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
@@ -88,14 +88,14 @@ void ProblemStructure::updateForcingTerms() {
 
     for (int i = 0; i < M; ++i)
       for (int j = 0; j < (N - 1); ++j)
-        uForcingWindow (j, i) = 0;
+        uForcingWindow (i, j) = 0;
 
     for (int i = 0; i < (M - 1); ++i)
       for (int j = 0; j < N; ++j) {
-        vForcingWindow (j, i) =  -1 * densityConstant *
+        vForcingWindow (i, j) =  -1 * densityConstant *
                                   (1 - thermalExpansion *
-                                   ((temperatureWindow (j, i) +
-                                     temperatureWindow (j, i + 1)) / 2 -
+                                   ((temperatureWindow (i, j) +
+                                     temperatureWindow (i + 1, j)) / 2 -
                                       referenceTemperature));
       }
   } else {
