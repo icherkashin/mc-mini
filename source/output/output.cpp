@@ -130,9 +130,9 @@ void OutputStructure::writeHDF5File (const int timestep) {
 
   // Write U Velocity
   static double * interpolatedUVelocityData = new double [M * N];
-  static DataWindow<double> interpolatedUVelocityWindow (interpolatedUVelocityData, N, M);
-  static DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), 2, M);
-  static DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), N - 1, M);
+  static DataWindow<double> interpolatedUVelocityWindow (interpolatedUVelocityData, M, N);
+  static DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), M, 2);
+  static DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), M, N - 1);
 
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -167,9 +167,9 @@ void OutputStructure::writeHDF5File (const int timestep) {
 
   // Write V Velocity
   static double * interpolatedVVelocityData = new double [M * N];
-  static DataWindow<double> interpolatedVVelocityWindow (interpolatedVVelocityData, N, M);
-  static DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), N, 2);
-  static DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), N, M - 1);
+  static DataWindow<double> interpolatedVVelocityWindow (interpolatedVVelocityData, M, N);
+  static DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), 2, N);
+  static DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), M - 1, N);
 
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {
@@ -203,7 +203,7 @@ void OutputStructure::writeHDF5File (const int timestep) {
                   << "        </Attribute>" << endl;
 
   static double * velocityDivergenceData = new double[M * N];
-  static DataWindow<double> velocityDivergenceWindow (velocityDivergenceData, N, M);
+  static DataWindow<double> velocityDivergenceWindow (velocityDivergenceData, M, N);
 
   for (int i = 0; i < M; ++i) {
     for (int j = 0; j < N; ++j) {

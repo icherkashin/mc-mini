@@ -36,7 +36,7 @@ void ProblemStructure::initializeTimestep() {
 }
 
 void ProblemStructure::initializeTemperature() {
-  DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
+  DataWindow<double> temperatureWindow (geometry.getTemperatureData(), M, N);
 
   double referenceTemperature;
   double temperatureScale;
@@ -115,12 +115,12 @@ void ProblemStructure::initializeTemperature() {
   #ifdef DEBUG
     cout << "<Initialized temperature model as: \"" << temperatureModel << "\">" << endl;
     cout << "<Temperature Data>" << endl;
-    cout << temperatureWindow.displayMatrix() << endl << endl;
+    temperatureWindow.displayMatrix();
   #endif
 }
 
 void ProblemStructure::initializeTemperatureBoundary() {
-  DataWindow<double> temperatureBoundaryWindow (geometry.getTemperatureBoundaryData(), N, 2);
+  DataWindow<double> temperatureBoundaryWindow (geometry.getTemperatureBoundaryData(), 2, N);
 
   double upperTemperature;
   double lowerTemperature;
@@ -143,8 +143,8 @@ void ProblemStructure::initializeTemperatureBoundary() {
 }
 
 void ProblemStructure::initializeVelocityBoundary() {
-  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), 2, M);
-  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), N, 2);
+  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), M, 2);
+  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), 2, N);
 
 
   if (boundaryModel == "tauBenchmark") {
@@ -170,14 +170,14 @@ void ProblemStructure::initializeVelocityBoundary() {
   #ifdef DEBUG
     cout << "<Initialized boundary model as: \"" << boundaryModel << "\">" << endl;
     cout << "<U Velocity Boundary Data>" << endl;
-    cout << uVelocityBoundaryWindow.displayMatrix() << endl;
+    uVelocityBoundaryWindow.displayMatrix();
     cout << "<V Velocity Boundary Data>" << endl;
-    cout << vVelocityBoundaryWindow.displayMatrix() << endl << endl;
+    vVelocityBoundaryWindow.displayMatrix();
   #endif
 }
 
 void ProblemStructure::initializeViscosity() {
-  DataWindow<double> viscosityWindow (geometry.getViscosityData(), N + 1, M + 1);
+  DataWindow<double> viscosityWindow (geometry.getViscosityData(), M + 1, N + 1);
 
   double viscosity;
 
@@ -213,6 +213,6 @@ void ProblemStructure::initializeViscosity() {
   #ifdef DEBUG
     cout << "<Viscosity model initialized as: \"" << viscosityModel << "\">" << endl;
     cout << "<Viscosity Data>" << endl;
-    cout << viscosityWindow.displayMatrix() << endl << endl;
+    viscosityWindow.displayMatrix();
   #endif
 }

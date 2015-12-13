@@ -21,10 +21,10 @@ void ProblemStructure::upwindMethod() {
   Map<VectorXd> temperatureVector (geometry.getTemperatureData(), M * N);
   Map<VectorXd> temperatureBoundaryVector (geometry.getTemperatureBoundaryData(), 2 * M);
 
-  DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), N - 1, M);
-  DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), N, M - 1);
-  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), 2, M);
-  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), N, 2);
+  DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), M, N - 1);
+  DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), M - 1, N);
+  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), M, 2);
+  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), 2, N);
 
   double leftVelocity, rightVelocity, bottomVelocity, topVelocity;
   double leftFlux, rightFlux, bottomFlux, topFlux;
@@ -96,57 +96,57 @@ void ProblemStructure::laxWendroff() {
 
 void ProblemStructure::frommMethod() {
   // Temperature data (MxN cell-centered grid)
-  DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
+  DataWindow<double> temperatureWindow (geometry.getTemperatureData(), M, N);
   // Temperature boundary data (2xN transverse boundary grid)
-  DataWindow<double> temperatureBoundaryWindow (geometry.getTemperatureBoundaryData(), N, 2);
+  DataWindow<double> temperatureBoundaryWindow (geometry.getTemperatureBoundaryData(), 2, N);
 //
   // U Velocity Data (Mx(N-1) lateral offset grid)
-  DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), N - 1, M);
+  DataWindow<double> uVelocityWindow (geometry.getUVelocityData(), M, N - 1);
   // V Velocity Data ((M-1)xN transverse offset grid)
-  DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), N, M - 1);
+  DataWindow<double> vVelocityWindow (geometry.getVVelocityData(), M - 1, N);
 
   // U Velocity Boundary Data (Mx2 lateral boundary grid)
-  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), 2, M);
+  DataWindow<double> uVelocityBoundaryWindow (geometry.getUVelocityBoundaryData(), M, 2);
   // V Velocity Boundary Data (2xN transverse boundary grid)
-  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), N, 2);
+  DataWindow<double> vVelocityBoundaryWindow (geometry.getVVelocityBoundaryData(), 2, N);
 
   // Initilize half-time data
   // Half-time temperature data (MxN cell-centered grid)
-  static DataWindow<double> halfTimeTemperatureWindow (new double[M * N], N, M);
+  static DataWindow<double> halfTimeTemperatureWindow (new double[M * N], M, N);
   // Half-time U-Offset temperature data (Mx(N-1) lateral offset grid)
-  static DataWindow<double> halfTimeUOffsetTemperatureWindow (new double[M * (N - 1)], N - 1, M);
+  static DataWindow<double> halfTimeUOffsetTemperatureWindow (new double[M * (N - 1)], M, N - 1);
   // Half-time V-offset temperature data ((M-1)xN transverse offset grid)
-  static DataWindow<double> halfTimeVOffsetTemperatureWindow (new double[(M - 1) * N], N, M - 1);
+  static DataWindow<double> halfTimeVOffsetTemperatureWindow (new double[(M - 1) * N], M - 1, N);
 
   // Half-time Forcing Data (for use in the Stokes solve)
   static double * halfTimeForcingData = new double[2 * M * N - M - N];
   // Half-time U forcing data (Mx(N-1) lateral offset grid)
   static double * halfTimeUForcingData = halfTimeForcingData;
-  static DataWindow<double> halfTimeUForcingWindow (halfTimeUForcingData, N - 1, M);
+  static DataWindow<double> halfTimeUForcingWindow (halfTimeUForcingData, M, N - 1);
   // Half-time V forcing data ((M-1)xN transverse offset grid)
   static double * halfTimeVForcingData = halfTimeForcingData + M * (N - 1);
-  static DataWindow<double> halfTimeVForcingWindow (halfTimeVForcingData, N, M - 1);
+  static DataWindow<double> halfTimeVForcingWindow (halfTimeVForcingData, M - 1, N);
 
   // Half-time Stokes solution data (for use in the Stokes solve)
   static double * halfTimeStokesSolnData = new double[3 * M * N - M - N];
   // Half-time U velocity data (Mx(N-1) lateral offset grid)
   static double * halfTimeUVelocityData = halfTimeStokesSolnData;
-  static DataWindow<double> halfTimeUVelocityWindow (halfTimeUVelocityData, N - 1, M);
+  static DataWindow<double> halfTimeUVelocityWindow (halfTimeUVelocityData, M, N - 1);
   // Half-time V velocity data ((M-1)xN transverse offset grid)
   static double * halfTimeVVelocityData = halfTimeStokesSolnData + M * (N - 1);
-  static DataWindow<double> halfTimeVVelocityWindow (halfTimeVVelocityData, N, M - 1);
+  static DataWindow<double> halfTimeVVelocityWindow (halfTimeVVelocityData, M - 1, N);
   // Half-time pressure data (MxN cell-centered grid) (not technically necessary)
   static double * halfTimePressureData = halfTimeStokesSolnData + 2 * M * N - M - N;
-  static DataWindow<double> halfTimePressureWindow (halfTimePressureData, N, M);
+  static DataWindow<double> halfTimePressureWindow (halfTimePressureData, M, N);
 
   // Cell-centered velocities
   static double * cellCenteredVelocityData = new double[2 * M * N];
   // Cell-centered U velocity (MxN cell-centered grid)
   static double * cellCenteredUVelocityData = cellCenteredVelocityData;
-  static DataWindow<double> cellCenteredUVelocityWindow (cellCenteredUVelocityData, N, M);
+  static DataWindow<double> cellCenteredUVelocityWindow (cellCenteredUVelocityData, M, N);
   // Cell-centered V velocity (MxN cell-centered grid)
   static double * cellCenteredVVelocityData = cellCenteredVelocityData + M * N;
-  static DataWindow<double> cellCenteredVVelocityWindow (cellCenteredVVelocityData, N, M);
+  static DataWindow<double> cellCenteredVVelocityWindow (cellCenteredVVelocityData, M, N);
 
   Map<VectorXd> halfTimeStokesSolnVector (halfTimeStokesSolnData, 3 * M * N - M - N);
   VectorXd temporaryTemperature = Map<VectorXd> (geometry.getTemperatureData(), N * M);
@@ -182,9 +182,9 @@ void ProblemStructure::frommMethod() {
   #ifdef DEBUG
     cout << "<Half-time Cell-Centered Velocities Calculated>" << std::endl;
     cout << "<Cell-Centered U Velocity>" << endl;
-    cout << cellCenteredUVelocityWindow.displayMatrix() << endl;
+    cellCenteredUVelocityWindow.displayMatrix();
     cout << "<Cell-Centered V Velocity>" << endl;
-    cout << cellCenteredVVelocityWindow.displayMatrix() << endl;
+    cellCenteredVVelocityWindow.displayMatrix();
   #endif
 
   // Calculate temperatures at half-time level
@@ -249,7 +249,7 @@ void ProblemStructure::frommMethod() {
   #ifdef DEBUG
     cout << "<Half-Time Offset Temperatures>" << endl;
     cout << "<Half-Time U-Offset Temperature>" << endl;
-    cout << halfTimeUOffsetTemperatureWindow.displayMatrix() << endl;
+    halfTimeUOffsetTemperatureWindow.displayMatrix();
   #endif
 
   // Calculate half-time V-offset temperatures ((M-1)xN transverse offset grid)
@@ -316,7 +316,7 @@ void ProblemStructure::frommMethod() {
 
   #ifdef DEBUG
     cout << "<Half-Time V-Offset Temperature>" << endl;
-    cout << halfTimeVOffsetTemperatureWindow.displayMatrix() << endl << endl;
+    halfTimeVOffsetTemperatureWindow.displayMatrix();
   #endif
 
   double leftHalfTimeNeighborT, rightHalfTimeNeighborT,
@@ -369,7 +369,7 @@ void ProblemStructure::frommMethod() {
 
   #ifdef DEBUG
     cout << "<Half-Time Temperature Data>" << endl;
-    cout << halfTimeTemperatureWindow.displayMatrix() << endl << endl;
+    halfTimeTemperatureWindow.displayMatrix();
   #endif
 
   // Calculate half-time forcing
@@ -437,9 +437,9 @@ void ProblemStructure::frommMethod() {
   #ifdef DEBUG
     cout << "<Half-Time Forcing Data>" << endl;
     cout << "<Half-Time U Forcing Data>" << endl;
-    cout << halfTimeUForcingWindow.displayMatrix() << endl;
+    halfTimeUForcingWindow.displayMatrix();
     cout << "<Half-Time V Forcing Data>" << endl;
-    cout << halfTimeVForcingWindow.displayMatrix() << endl << endl;
+    halfTimeVForcingWindow.displayMatrix();
   #endif
 
   // Initialize half-time solver
@@ -468,16 +468,16 @@ void ProblemStructure::frommMethod() {
 
     #ifdef DEBUG
       cout << "<Viscosity Data>" << endl;
-      cout << DataWindow<double> (geometry.getViscosityData(), N + 1, M + 1).displayMatrix() << endl << endl;
+      DataWindow<double> (geometry.getViscosityData(), M + 1, N + 1).displayMatrix();
     #endif
   }
 
   #ifdef DEBUG
     cout << "<Velocity Boundary Data>" << endl;
     cout << "<U Velocity Boundary Data>" << endl;
-    cout << uVelocityBoundaryWindow.displayMatrix() << endl;
+    uVelocityBoundaryWindow.displayMatrix();
     cout << "<V Velocity Boundary Data>" << endl;
-    cout << vVelocityBoundaryWindow.displayMatrix() << endl << endl;
+    vVelocityBoundaryWindow.displayMatrix();
   #endif
 
   // Solve stokes at the half-time to find velocities
@@ -498,9 +498,9 @@ void ProblemStructure::frommMethod() {
   #ifdef DEBUG
     cout << "<Half-Time Velocities>" << endl;
     cout << "<Half-Time U Velocity>" << endl;
-    cout << halfTimeUVelocityWindow.displayMatrix() << endl;
+    halfTimeUVelocityWindow.displayMatrix();
     cout << "<Half-Time V Velocity>" << std::endl;
-    cout << halfTimeVVelocityWindow.displayMatrix() << endl << endl;
+    halfTimeVVelocityWindow.displayMatrix();
   #endif
 
   double leftVelocity, rightVelocity, bottomVelocity, topVelocity;
@@ -675,6 +675,6 @@ void ProblemStructure::frommMethod() {
 
   #ifdef DEBUG
     cout << "<Full-Time Temperature Data>" << endl;
-    cout << temperatureWindow.displayMatrix() << endl << endl;
+    temperatureWindow.displayMatrix();
   #endif
 }

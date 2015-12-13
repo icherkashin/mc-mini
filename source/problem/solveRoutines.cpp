@@ -32,8 +32,8 @@ using namespace std;
 // Update the forcing terms
 // T -> F
 void ProblemStructure::updateForcingTerms() {
-  DataWindow<double> uForcingWindow (geometry.getUForcingData(), N - 1, M);
-  DataWindow<double> vForcingWindow (geometry.getVForcingData(), N, M - 1);
+  DataWindow<double> uForcingWindow (geometry.getUForcingData(), M, N - 1);
+  DataWindow<double> vForcingWindow (geometry.getVForcingData(), M - 1, N);
 
   #ifdef DEBUG
     cout << "<Calculating forcing model using \"" << forcingModel << "\">" << endl;
@@ -70,7 +70,7 @@ void ProblemStructure::updateForcingTerms() {
         vForcingWindow (i, j) = -sin ((j + 0.5) * h) * cos ((i + 1) * h);
 
   } else if (forcingModel == "buoyancy") {
-    DataWindow<double> temperatureWindow (geometry.getTemperatureData(), N, M);
+    DataWindow<double> temperatureWindow (geometry.getTemperatureData(), M, N);
 
     double referenceTemperature;
     double densityConstant;
@@ -104,9 +104,9 @@ void ProblemStructure::updateForcingTerms() {
 
   #ifdef DEBUG
     cout << "<U Forcing Data>" << endl;
-    cout << uForcingWindow.displayMatrix() << endl;
+    uForcingWindow.displayMatrix();
     cout << "<V Forcing Data>" << endl;
-    cout << vForcingWindow.displayMatrix() << endl << endl;
+    vForcingWindow.displayMatrix();
   #endif
 }
 
@@ -164,11 +164,11 @@ void ProblemStructure::solveStokes() {
 #ifdef DEBUG
   cout << "<Calculated Stokes Equation Solutions>" << endl;
   cout << "<U Velocity Data>" << endl;
-  cout << DataWindow<double> (geometry.getUVelocityData(), N - 1, M).displayMatrix() << endl;
+  DataWindow<double> (geometry.getUVelocityData(), M, N - 1).displayMatrix();
   cout << "<V Velocity Data>" << endl;
-  cout << DataWindow<double> (geometry.getVVelocityData(), N, M - 1).displayMatrix() << endl;
+  DataWindow<double> (geometry.getVVelocityData(), M - 1, N).displayMatrix();
   cout << "<Pressure Data>" << endl;
-  cout << DataWindow<double> (geometry.getPressureData(), N, M).displayMatrix() << endl << endl;
+  DataWindow<double> (geometry.getPressureData(), M, N).displayMatrix();
 #endif
 }
 

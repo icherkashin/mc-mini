@@ -22,11 +22,13 @@ class DataWindow {
      *  **columns** \* **rows**, pointed to by **basePtr**.
      */
     DataWindow(T *basePtr,
-               unsigned int columns,
-               unsigned int rows) :
+               unsigned int rows,
+               unsigned int columns
+               ) :
         __basePtr(basePtr),
-        __cols(columns),
-        __rows(rows) {};
+        __rows(rows),
+        __cols(columns)
+         {};
 
     /** @brief Subscripts the memory region wrapped by DataWindow, with bounds
      *         -checking
@@ -45,17 +47,12 @@ class DataWindow {
     }
 
     /** @brief Displays the data array wrapped by DataWindow */
-    const std::string displayMatrix() {
-      /*  TODO: Actually return a string version of the array rather than
-       *  outputting it here.
-       */
+    void displayMatrix() {
       std::cout << e::Map<e::Matrix<T, e::Dynamic, e::Dynamic, e::RowMajor> >(__basePtr, __rows, __cols).colwise().reverse();
-
-      return "";
     }
 
   private:
     T *const           __basePtr;
-    const unsigned int __cols;
     const unsigned int __rows;
+    const unsigned int __cols;
 };
